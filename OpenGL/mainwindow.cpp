@@ -11,24 +11,46 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     //for moving x axis
-    QObject::connect(ui->XSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setXRotation);
-    QObject::connect(ui->widget, &OpenGLWidget::xRotationChanged, ui->XSlider, &QSlider::setValue);
+    connect(ui->XSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setXRotation);
+    connect(ui->widget, &OpenGLWidget::xRotationChanged, ui->XSlider, &QSlider::setValue);
     //for moving y axis
-    QObject::connect(ui->YSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setYRotation);
-    QObject::connect(ui->widget, &OpenGLWidget::yRotationChanged, ui->YSlider, &QSlider::setValue);
+    connect(ui->YSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setYRotation);
+    connect(ui->widget, &OpenGLWidget::yRotationChanged, ui->YSlider, &QSlider::setValue);
     ////for moving z axis
-    QObject::connect(ui->ZSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setZRotation);
-    QObject::connect(ui->widget, &OpenGLWidget::zRotationChanged, ui->ZSlider, &QSlider::setValue);
-    QObject::connect(ui->FillBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
-    QObject::connect(ui->LineBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
-    QObject::connect(ui->DCBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
-    QObject::connect(ui->CullingBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
-    //QObject::connect(ui->label_fps);
-    QObject::connect(ui->widget,&OpenGLWidget::showFPS, this, &MainWindow::showFPS);
+    connect(ui->ZSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setZRotation);
+    connect(ui->widget, &OpenGLWidget::zRotationChanged, ui->ZSlider, &QSlider::setValue);
+	//
+    connect(ui->FillBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
+    connect(ui->LineBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
+    connect(ui->DCBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
+    connect(ui->CullingBox, &QCheckBox::stateChanged, this, &MainWindow::FillMode);
+    //
+    connect(ui->widget,&OpenGLWidget::showFPS, this, &MainWindow::showFPS);
     //Numbers of objects on scene
-    QObject::connect(ui->NumbersOfObjectsX, &QSlider::valueChanged, this, &MainWindow::changeNumberOfObj);
-    QObject::connect(ui->NumbersOfObjectsY, &QSlider::valueChanged, this, &MainWindow::changeNumberOfObj);
-    QObject::connect(ui->NumbersOfObjectsZ, &QSlider::valueChanged, this, &MainWindow::changeNumberOfObj);
+    connect(ui->NumbersOfObjectsX, &QSlider::valueChanged, this, &MainWindow::changeNumberOfObj);
+    connect(ui->NumbersOfObjectsY, &QSlider::valueChanged, this, &MainWindow::changeNumberOfObj);
+    connect(ui->NumbersOfObjectsZ, &QSlider::valueChanged, this, &MainWindow::changeNumberOfObj);
+    //for AmbientStregth
+    connect(ui->AmbientStrengthSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setAmbientStregth);
+    connect(ui->widget, &OpenGLWidget::ambientStregthChanged, ui->AmbientStrengthSlider, &QSlider::setValue);
+	//for SpecularStregth
+    connect(ui->SpecularStrength, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setSpecularStrength);
+    connect(ui->widget, &OpenGLWidget::specularStrengthChanged, ui->SpecularStrength, &QSlider::setValue);
+    //for diffeseStregth
+    connect(ui->diffuseSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setDiffuseStrength);
+    connect(ui->widget, &OpenGLWidget::DiffuseChanged, ui->diffuseSlider, &QSlider::setValue);
+	//
+    connect(ui->AttenuationConstantSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setCAttenuation);
+    connect(ui->widget, &OpenGLWidget::CAttenuationChanged, ui->AttenuationConstantSlider, &QSlider::setValue);
+    //for SpecularStregth
+    connect(ui->AttenuationLinearSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setLAttenuation);
+    connect(ui->widget, &OpenGLWidget::LAttenuationChanged, ui->AttenuationLinearSlider, &QSlider::setValue);
+    //for diffeseStregth
+    connect(ui->AttenuationSquareSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setSAttenuation);
+    connect(ui->widget, &OpenGLWidget::SAttenuationChanged, ui->AttenuationSquareSlider, &QSlider::setValue);
+    //for Material
+    connect(ui->MaterialSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setMaterial);
+    connect(ui->widget, &OpenGLWidget::MaterialChanged, ui->MaterialSlider, &QSlider::setValue);
 }
 
 MainWindow::~MainWindow()

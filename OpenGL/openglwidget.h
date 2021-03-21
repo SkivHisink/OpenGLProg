@@ -18,6 +18,8 @@
 
 #include <chrono>
 
+#include "MaterialCollection.h"
+
 class OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
@@ -26,12 +28,7 @@ public:
 	using QOpenGLWidget::QOpenGLWidget;
 	OpenGLWidget();
 	~OpenGLWidget();
-	void setProp(const double prop_n) {
-		prop = prop_n;
-	}
-	void setMorphType(const int mt_n) {
-		morph_type = mt_n;
-	}
+
 	void setFigureFill(const bool fill_n) {
 		figure_fill = fill_n;
 	}
@@ -68,18 +65,30 @@ protected:
 	// void resizeGL(int w, int h) override;
 	void paintGL() override;
 	void setAnimating(bool animating);
-	//  void initShaders();
-	//  void initTextures();
 	void keyevent();
 public slots:
 	void setXRotation(int angle);
 	void setYRotation(int angle);
 	void setZRotation(int angle);
+	void setAmbientStregth(int val);
+	void setSpecularStrength(int val);
+	void setDiffuseStrength(int val);
+	void setCAttenuation(int val);
+	void setLAttenuation(int val);
+	void setSAttenuation(int val);
+	void setMaterial(int val);
 	void updateFPS();
 signals:
 	void xRotationChanged(int angle);
 	void yRotationChanged(int angle);
 	void zRotationChanged(int angle);
+	void CAttenuationChanged(int angle);
+	void LAttenuationChanged(int angle);
+	void SAttenuationChanged(int angle);
+	void ambientStregthChanged(int val);
+	void specularStrengthChanged(int val);
+	void MaterialChanged(int val);
+	void DiffuseChanged(int val);
 	void showFPS();
 
 private:
@@ -113,7 +122,7 @@ private:
 	bool depth_state = true;
 	bool culling_state = true;
 	//keycontrol
-	KeyBoard keyboard;
+	KeyBoard* keyboard = nullptr;
 	//
 	double fps = 0.0;
 	std::chrono::high_resolution_clock::time_point begin;
@@ -130,8 +139,21 @@ private:
 	Camera camera;
 	//light
 	Cube* light;
-	QVector3D lightPos = QVector3D(0.0f, 5.0f, 0.0f);
+	QVector3D lightPos = QVector3D(0.0f, 5.0f, -40.0f);
 	QVector3D lightColor = QVector3D(1.0f, 1.0f, 1.0f);
+	float ambientStrength = 0.1f;
+	float specularStrength = 0.5f;
+	float diffuseStrength = 1;
+	float attenuationConstant= 1.0;
+	float attenuationLinear= 0.3;
+	float attenuationSquare= 0.1;
+	float ligth_x_move = 0.0f;
+	float ligth_z_move = 0.0f;
+	float ligth_y_move = 0.0f;
+	//
+	MaterialCollection::MaterialCollection mC;
+	MaterialCollection::Material material= mC.material_collection[MaterialCollection::Pearl];
+	int numb_of_mat = MaterialCollection::Pearl;
 };
 
 #endif // OPENGLWIDGET_H

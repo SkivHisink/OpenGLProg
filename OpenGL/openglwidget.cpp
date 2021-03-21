@@ -15,7 +15,6 @@ static void qNormalizeAngle(int& angle)
 	while (angle > 360 * 16)
 		angle -= 360 * 16;
 }
-
 void OpenGLWidget::setXRotation(int angle)
 {
 	qNormalizeAngle(angle);
@@ -25,7 +24,6 @@ void OpenGLWidget::setXRotation(int angle)
 		update();
 	}
 }
-
 void OpenGLWidget::setYRotation(int angle)
 {
 	qNormalizeAngle(angle);
@@ -35,7 +33,6 @@ void OpenGLWidget::setYRotation(int angle)
 		update();
 	}
 }
-
 void OpenGLWidget::setZRotation(int angle)
 {
 	qNormalizeAngle(angle);
@@ -45,22 +42,74 @@ void OpenGLWidget::setZRotation(int angle)
 		update();
 	}
 }
+void OpenGLWidget::setAmbientStregth(int val)
+{
+	float tmp = ((float)val) / 1000;
+	if (tmp != ambientStrength) {
+		ambientStrength = tmp;
+	}
+}
+void OpenGLWidget::setSpecularStrength(int val)
+{
+	float tmp = ((float)val) / 100;
+	if (tmp != specularStrength) {
+		specularStrength = tmp;
+	}
+}
+void OpenGLWidget::setDiffuseStrength(int val)
+{
+	float tmp = ((float)val) / 100;
+	if (tmp != diffuseStrength) {
+		diffuseStrength = tmp;
+	}
+}
+void OpenGLWidget::setCAttenuation(int val)
+{
+	float tmp = ((float)val) / 100;
+	if (tmp != attenuationConstant) {
+		attenuationConstant = tmp;
+	}
+}
+void OpenGLWidget::setLAttenuation(int val)
+{
+	float tmp = ((float)val) / 100;
+	if (tmp != attenuationLinear) {
+		attenuationLinear = tmp;
+	}
+}
+void OpenGLWidget::setSAttenuation(int val)
+{
+	float tmp = ((float)val) / 100;
+	if (tmp != attenuationSquare) {
+		attenuationSquare = tmp;
+	}
+}
+void OpenGLWidget::setMaterial(int val)
+{
+	if (val != numb_of_mat) {
+		numb_of_mat = val;
+		material = mC.material_collection[numb_of_mat];
+	}
+}
 void OpenGLWidget::middle_point(int i, int j, int* max_indx)
 {
 	auto& vert = cube->vertices;
-	auto ver_1_1 = vert[(i) * 6 + 0];
-	auto ver_1_2 = vert[(j) * 6 + 0];
-	auto ver_2_1 = vert[(i) * 6 + 1];
-	auto ver_2_2 = vert[(j) * 6 + 1];
-	auto ver_3_1 = vert[(i) * 6 + 2];
-	auto ver_3_2 = vert[(j) * 6 + 2];
+	auto ver_1_1 = vert[(i)*cube->data_len + 0];
+	auto ver_1_2 = vert[(j)*cube->data_len + 0];
+	auto ver_2_1 = vert[(i)*cube->data_len + 1];
+	auto ver_2_2 = vert[(j)*cube->data_len + 1];
+	auto ver_3_1 = vert[(i)*cube->data_len + 2];
+	auto ver_3_2 = vert[(j)*cube->data_len + 2];
 
 	vert.push_back((ver_1_1 + ver_1_2) / 2);
 	vert.push_back((ver_2_1 + ver_2_2) / 2);
 	vert.push_back((ver_3_1 + ver_3_2) / 2);
-	vert.push_back(abs(vert[(i) * 6 + 3] + vert[(j) * 6 + 3]) / 2);
-	vert.push_back(abs(vert[(i) * 6 + 4] + vert[(j) * 6 + 4]) / 2);
-	vert.push_back(abs(vert[(i) * 6 + 5] + vert[(j) * 6 + 5]) / 2);
+	vert.push_back(abs(vert[(i)*cube->data_len + 3] + vert[(j)*cube->data_len + 3]) / 2);
+	vert.push_back(abs(vert[(i)*cube->data_len + 4] + vert[(j)*cube->data_len + 4]) / 2);
+	vert.push_back(abs(vert[(i)*cube->data_len + 5] + vert[(j)*cube->data_len + 5]) / 2);
+	vert.push_back(abs(vert[(i)*cube->data_len + 3] + vert[(j)*cube->data_len + 3]) / 2);
+	vert.push_back(abs(vert[(i)*cube->data_len + 4] + vert[(j)*cube->data_len + 4]) / 2);
+	vert.push_back(abs(vert[(i)*cube->data_len + 5] + vert[(j)*cube->data_len + 5]) / 2);
 
 	++* max_indx;
 }
@@ -80,36 +129,45 @@ void OpenGLWidget::initialize()
 	m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "fragment.fs");
 	m_program->link();
 	auto log = m_program->log();
-
+	keyboard = new KeyBoard();
 	//m_program->log();
 	// Use QBasicTimer because its faster than QTimer
 	timer.start(12, this);
 	//
 	cube = new Cube();
-	int max_indx = 8;
+	int max_indx = 23;
 	auto& indxs = cube->indices;
-	int numb_of_crop = number_of_triangle_breaking(3);//12 |60|252|1020|formula: prev+6*2^(iter_num+2)
+	int numb_of_crop = number_of_triangle_breaking(0);//12 |60|252|1020|formula: prev+6*2^(iter_num+2)
 	std::vector<float> new_vert;
 	for (int i = 0; i < numb_of_crop; ++i) {
 		middle_point(indxs[i * 3 + 0], indxs[i * 3 + 1], &max_indx);
 		middle_point(indxs[i * 3 + 0], indxs[i * 3 + 2], &max_indx);
 		middle_point(indxs[i * 3 + 1], indxs[i * 3 + 2], &max_indx);
 		//
-		cube->indices.push_back(indxs[i * 3 + 0]);
-		cube->indices.push_back(max_indx - 3);
+		for (int j = 0; j < 3; ++j)
+		{
+			for (int k = 0; k < 9; ++k)
+			{
+				cube->vertices.push_back(cube->vertices[indxs[i * 3 + j] + k]);
+
+			}
+		}
+		max_indx += 3;
 		cube->indices.push_back(max_indx - 2);
+		cube->indices.push_back(max_indx - 5);
+		cube->indices.push_back(max_indx - 4);
 		//
+		cube->indices.push_back(max_indx - 5);
+		cube->indices.push_back(max_indx - 1);
 		cube->indices.push_back(max_indx - 3);
-		cube->indices.push_back(indxs[i * 3 + 1]);
-		cube->indices.push_back(max_indx - 1);
-		//
-		cube->indices.push_back(max_indx - 1);
-		cube->indices.push_back(max_indx - 2);
+		//									+1
 		cube->indices.push_back(max_indx - 3);
-		//
-		cube->indices.push_back(max_indx - 2);
-		cube->indices.push_back(max_indx - 1);
-		cube->indices.push_back(indxs[i * 3 + 2]);
+		cube->indices.push_back(max_indx - 4);
+		cube->indices.push_back(max_indx - 5);
+		//									+1
+		cube->indices.push_back(max_indx - 4);
+		cube->indices.push_back(max_indx - 3);
+		cube->indices.push_back(max_indx);
 
 	}
 	for (int i = 0; i < numb_of_crop; ++i)
@@ -118,27 +176,29 @@ void OpenGLWidget::initialize()
 		cube->indices.erase(cube->indices.begin());
 		cube->indices.erase(cube->indices.begin());
 	}
-
 	cube->init(this);
 	cube->init_normal();
 	m_program->enableAttributeArray("posAttr");
-	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, 6 * sizeof(float));
+	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, cube->data_len * sizeof(float));
 
 	m_program->enableAttributeArray("colAttr");
-	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, 6 * sizeof(float));
+	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, cube->data_len * sizeof(float));
+
+	m_program->enableAttributeArray("normal");
+	m_program->setAttributeBuffer("normal", GL_FLOAT, 6 * sizeof(float), 3, cube->data_len * sizeof(float));
 	//key control
 
 	light = new Cube();
 	light->init(this);
 	light->setWhiteColot();
 	m_program->enableAttributeArray("posAttr");
-	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, 6 * sizeof(float));
+	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, light->data_len * sizeof(float));
 
 	m_program->enableAttributeArray("colAttr");
-	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, 6 * sizeof(float));
+	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, light->data_len * sizeof(float));
 
 
-	keyboard.pressed_button.assign(60, false);
+	keyboard->pressed_button.assign(60, false);
 	// light
 
 	begin = std::chrono::high_resolution_clock::now();
@@ -228,7 +288,7 @@ void OpenGLWidget::timerEvent(QTimerEvent*)
 	// Request an update
 	update();
 }
-
+double bft = 0;
 void OpenGLWidget::paintGL()
 {
 	if (!initialized)
@@ -266,6 +326,8 @@ void OpenGLWidget::paintGL()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 	glShadeModel(GL_SMOOTH);
+	std::vector<GLfloat> ambient_matrial_red_plastic = { 0,0,0 };
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_matrial_red_plastic.data());
 	m_program->bind();
 	QMatrix4x4 matrix;
 	std::vector<QMatrix4x4> trate_cont;//translate+rotate=trate
@@ -288,9 +350,9 @@ void OpenGLWidget::paintGL()
 	if (color_change != 0) {
 		for (int i = 0; i < 8; ++i)
 		{
-			cube->vertices[i * 6 + 3] += color_change;
-			cube->vertices[i * 6 + 4] += color_change;
-			cube->vertices[i * 6 + 5] += color_change;
+			cube->vertices[i * cube->data_len + 3] += color_change;
+			cube->vertices[i * cube->data_len + 4] += color_change;
+			cube->vertices[i * cube->data_len + 5] += color_change;
 		}
 		color_change = 0;
 	}
@@ -299,34 +361,49 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("lightColor", lightColor);
 	m_program->setUniformValue("view", camera.getViewMatrix());
 	m_program->setUniformValue("projection", camera.getProjectionMatrix());
-
+	m_program->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
+	m_program->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
+	m_program->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
+	m_program->setUniformValue("material.diffuse", material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+	m_program->setUniformValue("material.specular", material.specular[0], material.specular[1], material.specular[2]);
+	m_program->setUniformValue("material.shininess", material.shininess);
 	cube->vao->bind();
+	cube->vbo->bind();
+
 	cube->vbo->write(0, cube->vertices.data(), cube->vertices.size() * sizeof(float));
+	//cube->vbo->allocate(cube->vertices.data(), cube->vertices.size() * sizeof(float));
 	for (auto trate : trate_cont) {
-		m_program->setUniformValue("model", matrix * trate);
+		m_program->setUniformValue("model", trate);
 		glDrawElements(GL_TRIANGLES, cube->indices.size(), GL_UNSIGNED_SHORT, 0);
 	}
 	cube->vao->release();
 
 	light->vao->bind();
+	light->vbo->bind();
 	light->vbo->write(0, light->vertices.data(), light->vertices.size() * sizeof(float));
 	QMatrix4x4 mat1 = QMatrix4x4();
 	mat1.setToIdentity();
 	mat1.translate(lightPos);
+	m_program->setUniformValue("material.ambient", 1.0f, 1.0f, 1.0f);
+	m_program->setUniformValue("material.diffuse", 1.0f, 1.0f, 1.0f);
+	m_program->setUniformValue("material.specular", 1.0f, 1.0f, 1.0f);
+	m_program->setUniformValue("material.shininess", 0);
 	m_program->setUniformValue("view", camera.getViewMatrix());
 	m_program->setUniformValue("projection", camera.getProjectionMatrix());
-	m_program->setUniformValue("model", matrix * mat1);
+	m_program->setUniformValue("model", mat1);
 	glDrawElements(GL_TRIANGLES, light->indices.size(), GL_UNSIGNED_SHORT, 0);
 	light->vao->release();
 
 	m_program->release();
-
 	++m_frame;
 	//fps
 	auto timet = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - begin);
+	lightPos = QVector3D(1.0f + sin(bft) * 2.0f + ligth_x_move, 10.0 + ligth_y_move, -40 + sin(bft / 2.0f) * 1.0f + ligth_z_move);
+	bft += 0.01;
 	if (timet.count() > 0.5) {
 		begin = std::chrono::high_resolution_clock::now();
 		fps = static_cast<float>(m_frame) / timet.count();
+
 		m_frame = 0;
 		updateFPS();
 	}
@@ -358,211 +435,214 @@ OpenGLWidget::~OpenGLWidget()
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
-	keyboard.keyPressEvent(event->key());
+	keyboard->keyPressEvent(event->key());
 }
 
 void OpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
-	keyboard.keyReleaseEvent(event->key());
+	keyboard->keyReleaseEvent(event->key());
 }
 
 void OpenGLWidget::keyevent()
 {
-	if (keyboard.pressed_button[0])
+	if (keyboard->pressed_button[0])
 	{
 		close();
 	}
-	if (keyboard.pressed_button[1])
+	if (keyboard->pressed_button[1])
 	{
 		setWindowState(windowState() ^ Qt::WindowFullScreen);
 	}
-	if (keyboard.pressed_button[2])
+	if (keyboard->pressed_button[2])
 	{
 		color_change += 0.1f;
 	}
-	if (keyboard.pressed_button[3])
+	if (keyboard->pressed_button[3])
 	{
 		color_change -= 0.1f;
 	}
-	if (keyboard.pressed_button[4])//R
+	if (keyboard->pressed_button[4])//R
 	{
 		camera.FOV -= 1.0f;
 	}
-	if (keyboard.pressed_button[5])//F
+	if (keyboard->pressed_button[5])//F
 	{
 		camera.FOV += 1.0f;
 	}
-	if (keyboard.pressed_button[6])
+	if (keyboard->pressed_button[6])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 1) * rotation;
 	}
-	if (keyboard.pressed_button[7])
+	if (keyboard->pressed_button[7])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), -1) * rotation;
 	}
-	if (keyboard.pressed_button[8])
+	if (keyboard->pressed_button[8])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 1) * rotation;
 	}
-	if (keyboard.pressed_button[9])
+	if (keyboard->pressed_button[9])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), -1) * rotation;
 	}
-	if (keyboard.pressed_button[10])
+	if (keyboard->pressed_button[10])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 1) * rotation;
 	}
-	if (keyboard.pressed_button[11])
+	if (keyboard->pressed_button[11])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), -1) * rotation;
 	}
-	if (keyboard.pressed_button[12])
+	if (keyboard->pressed_button[12])
 	{
 		camera.aspectRatio += 0.1f;
 	}
-	if (keyboard.pressed_button[13])
+	if (keyboard->pressed_button[13])
 	{
 		camera.aspectRatio -= 0.1f;
 	}
-	if (keyboard.pressed_button[14])
+	if (keyboard->pressed_button[14])
 	{
 
 	}
-	GLfloat cameraSpeed = 0.1f;
-	if (keyboard.pressed_button[15])
+	GLfloat cameraSpeed = 0.3f;
+	if (keyboard->pressed_button[15])
 	{
 		//z_coord += 0.1f;
 		camera.cameraPos += cameraSpeed * camera.cameraFront;
 	}
-	if (keyboard.pressed_button[16])
+	if (keyboard->pressed_button[16])
 	{
 		QVector3D tmp = tmp.crossProduct(camera.cameraFront, camera.cameraUp);
 		tmp.normalize();
 		camera.cameraPos -= tmp * cameraSpeed;
 	}
-	if (keyboard.pressed_button[17])
+	if (keyboard->pressed_button[17])
 	{
 		//z_coord -= 0.1f;
 		camera.cameraPos -= cameraSpeed * camera.cameraFront;
 	}
-	if (keyboard.pressed_button[18])
+	if (keyboard->pressed_button[18])
 	{
 		//x_coord -= 0.1f;
 		QVector3D tmp = QVector3D::crossProduct(camera.cameraFront, camera.cameraUp).normalized();
 		camera.cameraPos += tmp * cameraSpeed;
 	}
-	if (keyboard.pressed_button[19])
+	if (keyboard->pressed_button[19])
 	{
-		y_coord += 0.1f;
+		//y_coord += 0.1f;
+		camera.cameraPos += QVector3D(0.0, -1.0 * cameraSpeed, 0.0);
 	}
-	if (keyboard.pressed_button[20])
+	if (keyboard->pressed_button[20])
 	{
-		y_coord -= 0.1f;
+		//y_coord -= 0.1f;
+		camera.cameraPos += QVector3D(0.0, 1.0 * cameraSpeed, 0.0);
 	}
-	if (keyboard.pressed_button[21])
+	if (keyboard->pressed_button[21])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 1) * rotation;
 	}
-	if (keyboard.pressed_button[22])
+	if (keyboard->pressed_button[22])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 1) * rotation;
 	}
-	if (keyboard.pressed_button[23])
+	if (keyboard->pressed_button[23])
 	{
 		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 1) * rotation;
 	}
-	if (keyboard.pressed_button[24])//1 is red
+	if (keyboard->pressed_button[24])//1 is red
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 1;
-			cube->vertices[i * 6 + 4] = 0;
-			cube->vertices[i * 6 + 5] = 0;
+			cube->vertices[i * cube->data_len + 3] = 1;
+			cube->vertices[i * cube->data_len + 4] = 0;
+			cube->vertices[i * cube->data_len + 5] = 0;
 		}
 	}
-	if (keyboard.pressed_button[25])//2 is green
+	if (keyboard->pressed_button[25])//2 is green
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 0;
-			cube->vertices[i * 6 + 4] = 1;
-			cube->vertices[i * 6 + 5] = 0;
+			cube->vertices[i * cube->data_len + 3] = 0;
+			cube->vertices[i * cube->data_len + 4] = 1;
+			cube->vertices[i * cube->data_len + 5] = 0;
 		}
 	}
-	if (keyboard.pressed_button[26])//3 is blue
+	if (keyboard->pressed_button[26])//3 is blue
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 0;
-			cube->vertices[i * 6 + 4] = 0;
-			cube->vertices[i * 6 + 5] = 1;
+			cube->vertices[i * cube->data_len + 3] = 0;
+			cube->vertices[i * cube->data_len + 4] = 0;
+			cube->vertices[i * cube->data_len + 5] = 1;
 		}
 	}
-	if (keyboard.pressed_button[27])//4 is aqua
+	if (keyboard->pressed_button[27])//4 is aqua
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 0;
-			cube->vertices[i * 6 + 4] = 1;
-			cube->vertices[i * 6 + 5] = 1;
+			cube->vertices[i * cube->data_len + 3] = 0;
+			cube->vertices[i * cube->data_len + 4] = 1;
+			cube->vertices[i * cube->data_len + 5] = 1;
 		}
 	}
-	if (keyboard.pressed_button[28])//5 is pink
+	if (keyboard->pressed_button[28])//5 is pink
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 1;
-			cube->vertices[i * 6 + 4] = 0;
-			cube->vertices[i * 6 + 5] = 1;
+			cube->vertices[i * cube->data_len + 3] = 1;
+			cube->vertices[i * cube->data_len + 4] = 0;
+			cube->vertices[i * cube->data_len + 5] = 1;
 		}
 	}
-	if (keyboard.pressed_button[29])//6 is yellow
+	if (keyboard->pressed_button[29])//6 is yellow
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 1;
-			cube->vertices[i * 6 + 4] = 1;
-			cube->vertices[i * 6 + 5] = 0;
+			cube->vertices[i * cube->data_len + 3] = 1;
+			cube->vertices[i * cube->data_len + 4] = 1;
+			cube->vertices[i * cube->data_len + 5] = 0;
 		}
 	}
-	if (keyboard.pressed_button[30])//7 is black and white
+	if (keyboard->pressed_button[30])//7 is black and white
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = (float)i / 8;
-			cube->vertices[i * 6 + 4] = (float)i / 8;
-			cube->vertices[i * 6 + 5] = (float)i / 8;
+			cube->vertices[i * cube->data_len + 3] = (float)i / 8;
+			cube->vertices[i * cube->data_len + 4] = (float)i / 8;
+			cube->vertices[i * cube->data_len + 5] = (float)i / 8;
 		}
 	}
-	if (keyboard.pressed_button[31])//8 is inverse black and white
+	if (keyboard->pressed_button[31])//8 is inverse black and white
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 1.0 - (float)i / 8;
-			cube->vertices[i * 6 + 4] = 1.0 - (float)i / 8;
-			cube->vertices[i * 6 + 5] = 1.0 - (float)i / 8;
+			cube->vertices[i * cube->data_len + 3] = 1.0 - (float)i / 8;
+			cube->vertices[i * cube->data_len + 4] = 1.0 - (float)i / 8;
+			cube->vertices[i * cube->data_len + 5] = 1.0 - (float)i / 8;
 		}
 	}
-	if (keyboard.pressed_button[32])//9 is color inversion
+	if (keyboard->pressed_button[32])//9 is color inversion
 	{
-		for (int i = 0; i < cube->vertices.size() / 6; ++i)
+		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
 		{
-			cube->vertices[i * 6 + 3] = 1.0 - cube->vertices[i * 6 + 3];
-			cube->vertices[i * 6 + 4] = 1.0 - cube->vertices[i * 6 + 4];
-			cube->vertices[i * 6 + 5] = 1.0 - cube->vertices[i * 6 + 5];
+			cube->vertices[i * cube->data_len + 3] = 1.0 - cube->vertices[i * cube->data_len + 3];
+			cube->vertices[i * cube->data_len + 4] = 1.0 - cube->vertices[i * cube->data_len + 4];
+			cube->vertices[i * cube->data_len + 5] = 1.0 - cube->vertices[i * cube->data_len + 5];
 		}
-		keyboard.pressed_button[32] = !keyboard.pressed_button[32];
+		keyboard->pressed_button[32] = !keyboard->pressed_button[32];
 	}
-	if (keyboard.pressed_button[33])//return standart colors
+	if (false)//return standart colors
 	{
+		//keyboard->pressed_button[33]
 		int a = 0;
 		int b = 0;
 		int c = 0;
-		for (int i = 0; i < 48 / 6; ++i)
+		for (int i = 0; i < 8; ++i)
 		{
-			cube->vertices[i * 6 + 5] = a;
-			cube->vertices[i * 6 + 4] = b;
-			cube->vertices[i * 6 + 3] = c;
+			cube->vertices[i * cube->data_len + 5] = a;
+			cube->vertices[i * cube->data_len + 4] = b;
+			cube->vertices[i * cube->data_len + 3] = c;
 			++a;
 			if (a == 2) {
 				a = 0;
@@ -573,10 +653,34 @@ void OpenGLWidget::keyevent()
 				}
 			}
 		}
-		for (int i = 48 / 6; i < cube->vertices.size() / 6; ++i) {
-			cube->vertices[(i + 0) * 6 + 3] = abs(cube->vertices[(i - 5) * 6 + 3] + cube->vertices[(i - 6) * 6 + 3]) / 2;
-			cube->vertices[(i + 0) * 6 + 4] = abs(cube->vertices[(i - 5) * 6 + 4] + cube->vertices[(i - 6) * 6 + 4]) / 2;
-			cube->vertices[(i + 0) * 6 + 5] = abs(cube->vertices[(i - 5) * 6 + 5] + cube->vertices[(i - 6) * 6 + 5]) / 2;
+		for (int i = 8; i < cube->vertices.size() / cube->data_len; ++i) {
+			cube->vertices[(i + 0) * cube->data_len + 3] = abs(cube->vertices[(i - 5) * cube->data_len + 3] + cube->vertices[(i - cube->data_len) * cube->data_len + 3]) / 2;
+			cube->vertices[(i + 0) * cube->data_len + 4] = abs(cube->vertices[(i - 5) * cube->data_len + 4] + cube->vertices[(i - cube->data_len) * cube->data_len + 4]) / 2;
+			cube->vertices[(i + 0) * cube->data_len + 5] = abs(cube->vertices[(i - 5) * cube->data_len + 5] + cube->vertices[(i - cube->data_len) * cube->data_len + 5]) / 2;
 		}
+	}
+	if (keyboard->pressed_button[37])
+	{
+		ligth_x_move += 0.2f;
+	}
+	if (keyboard->pressed_button[35])
+	{
+		ligth_x_move -= 0.2f;
+	}
+	if (keyboard->pressed_button[36])
+	{
+		ligth_z_move += 0.2f;
+	}
+	if (keyboard->pressed_button[34])
+	{
+		ligth_z_move -= 0.2f;
+	}
+	if (keyboard->pressed_button[38])
+	{
+		ligth_y_move += 0.2f;
+	}
+	if (keyboard->pressed_button[39])
+	{
+		ligth_y_move -= 0.2f;
 	}
 }

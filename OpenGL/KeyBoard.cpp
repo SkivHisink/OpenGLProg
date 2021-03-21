@@ -73,6 +73,18 @@ void KeyBoard::keyPressEvent(int key_event)
 		pressed_button[32] = true;
 	if (key_event == Qt::Key_0 && pressed_button[33] == false)
 		pressed_button[33] = true;
+	if (key_event == Qt::Key_Up && pressed_button[34] == false)
+		pressed_button[34] = true;
+	if (key_event == Qt::Key_Left && pressed_button[35] == false)
+		pressed_button[35] = true;
+	if (key_event == Qt::Key_Down && pressed_button[36] == false)
+		pressed_button[36] = true;
+	if (key_event == Qt::Key_Right && pressed_button[37] == false)
+		pressed_button[37] = true;
+	if (key_event == Qt::Key_N && pressed_button[38] == false)
+		pressed_button[38] = true;
+	if (key_event == Qt::Key_M && pressed_button[39] == false)
+		pressed_button[39] = true;
 }
 void KeyBoard::keyReleaseEvent(int key_event)
 {
@@ -134,4 +146,16 @@ void KeyBoard::keyReleaseEvent(int key_event)
 		pressed_button[32] = false;
 	if (key_event == Qt::Key_0)
 		pressed_button[33] = false;
+	if (key_event == Qt::Key_Up)
+		pressed_button[34] = false;
+	if (key_event == Qt::Key_Left)
+		pressed_button[35] = false;
+	if (key_event == Qt::Key_Down)
+		pressed_button[36] = false;
+	if (key_event == Qt::Key_Right)
+		pressed_button[37] = false;
+	if (key_event == Qt::Key_N)
+		pressed_button[38] = false;
+	if (key_event == Qt::Key_M)
+		pressed_button[39] = false;
 }
