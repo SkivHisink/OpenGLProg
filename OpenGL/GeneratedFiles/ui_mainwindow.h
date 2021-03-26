@@ -60,6 +60,8 @@ public:
     QSlider *MaterialSlider;
     QLabel *MaterialType;
     QLabel *NoOiS;
+    QSlider *RSSlider;
+    QLabel *label_4;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -155,7 +157,7 @@ public:
         AmbientStrengthSlider = new QSlider(centralwidget);
         AmbientStrengthSlider->setObjectName(QString::fromUtf8("AmbientStrengthSlider"));
         AmbientStrengthSlider->setGeometry(QRect(1520, 550, 321, 22));
-        AmbientStrengthSlider->setMaximum(1000);
+        AmbientStrengthSlider->setMaximum(5000);
         AmbientStrengthSlider->setPageStep(10);
         AmbientStrengthSlider->setValue(100);
         AmbientStrengthSlider->setOrientation(Qt::Horizontal);
@@ -213,8 +215,8 @@ public:
         MaterialSlider = new QSlider(centralwidget);
         MaterialSlider->setObjectName(QString::fromUtf8("MaterialSlider"));
         MaterialSlider->setGeometry(QRect(1510, 850, 331, 22));
-        MaterialSlider->setMaximum(21);
-        MaterialSlider->setValue(3);
+        MaterialSlider->setMaximum(23);
+        MaterialSlider->setValue(23);
         MaterialSlider->setOrientation(Qt::Horizontal);
         MaterialType = new QLabel(centralwidget);
         MaterialType->setObjectName(QString::fromUtf8("MaterialType"));
@@ -222,6 +224,19 @@ public:
         NoOiS = new QLabel(centralwidget);
         NoOiS->setObjectName(QString::fromUtf8("NoOiS"));
         NoOiS->setGeometry(QRect(1540, 210, 171, 16));
+        RSSlider = new QSlider(centralwidget);
+        RSSlider->setObjectName(QString::fromUtf8("RSSlider"));
+        RSSlider->setGeometry(QRect(1540, 140, 301, 16));
+        RSSlider->setMinimum(-7200);
+        RSSlider->setMaximum(7200);
+        RSSlider->setSingleStep(16);
+        RSSlider->setPageStep(240);
+        RSSlider->setValue(10);
+        RSSlider->setOrientation(Qt::Horizontal);
+        RSSlider->setTickInterval(240);
+        label_4 = new QLabel(centralwidget);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+        label_4->setGeometry(QRect(1540, 120, 221, 16));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -259,6 +274,7 @@ public:
         label_14->setText(QCoreApplication::translate("MainWindow", "Square", nullptr));
         MaterialType->setText(QCoreApplication::translate("MainWindow", "Material Type:", nullptr));
         NoOiS->setText(QCoreApplication::translate("MainWindow", "Number of objects in scene:", nullptr));
+        label_4->setText(QCoreApplication::translate("MainWindow", "Rotation speed", nullptr));
     } // retranslateUi
 
 };

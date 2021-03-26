@@ -10,6 +10,7 @@ namespace MaterialCollection
 	};
 	enum MaterialTypes
 	{
+		rNone,
 		Emerald,
 		Jade,
 		Obsidian,
@@ -32,12 +33,14 @@ namespace MaterialCollection
 		Green_rubber,
 		Red_rubber,
 		White_rubber,
-		Yellow_rubber
+		Yellow_rubber,
+		Super_material
 	};
-	
+
 	struct MaterialCollection {
 		float shiness = 128;
-		std::vector<Material> material_collection = { { {0.0215f, 0.1745f, 0.0215f}, {0.07568f, 0.61424f, 0.07568f}, {0.633f, 0.727811f, 0.633f}, shiness * 0.6f },
+		std::vector<Material> material_collection = { { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, shiness * 0.0f},
+			{ {0.0215f, 0.1745f, 0.0215f}, {0.07568f, 0.61424f, 0.07568f}, {0.633f, 0.727811f, 0.633f}, shiness * 0.6f },
 	   { {0.135f, 0.2225f, 0.1575f}, {0.54f, 0.89f, 0.63f}, {0.316228f, 0.316228f, 0.316228f}, shiness * 0.1f },
 	   { {0.05375f, 0.05f, 0.06625f}, {0.18275f, 0.17f, 0.22525f}, {0.332741f, 0.328634f, 0.346435f}, shiness * 0.3f },
 	   { {0.25f, 0.20725f, 0.20725f}, {1.0f, 0.829f, 0.829f}, {0.296648f, 0.296648f, 0.296648f}, shiness * 0.088f },
@@ -60,6 +63,7 @@ namespace MaterialCollection
 	   { {0.0f, 0.05f, 0.0f}, {0.4,0.5,0.4}, {0.04,0.7, 0.04}, shiness * 0.078125f },
 	   { {0.05f, 0.0f, 0.0f}, {0.5,0.4,0.4}, {0.7, 0.04, 0.04}, shiness * 0.078125f },
 	   { {0.05f, 0.05f, 0.05f}, {0.5,0.5,0.5}, {0.7f, 0.7f, 0.7f}, shiness * 0.078125f } ,
-	   { {0.05f, 0.05f, 0.0f}, {0.5f, 0.5f, 0.4f}, {0.7f, 0.7f, 0.04f}, shiness * 0.078125f } };
+	   { {0.05f, 0.05f, 0.0f}, {0.5f, 0.5f, 0.4f}, {0.7f, 0.7f, 0.04f}, shiness * 0.078125f },
+	   { {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, shiness * 1.0f } };
 	};
 }

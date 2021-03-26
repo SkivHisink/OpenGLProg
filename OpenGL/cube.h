@@ -109,13 +109,13 @@ public:
 			vertices[indx3 + 8] = (tmp_3.z());
 		}
 	}
-	void setWhiteColot()
+	void setColot(float r, float g, float b)
 	{
 		for (int i = 0; i < vertices.size() / data_len; ++i)
 		{
-			vertices[i * data_len + 3] = 1;
-			vertices[i * data_len + 4] = 1;
-			vertices[i * data_len + 5] = 1;
+			vertices[i * data_len + 3] = r;
+			vertices[i * data_len + 4] = g;
+			vertices[i * data_len + 5] = b;
 		}
 	}
 };

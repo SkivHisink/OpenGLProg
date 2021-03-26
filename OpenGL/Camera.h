@@ -14,7 +14,7 @@ public:
 	GLfloat pitch = 0.0f;
 	float FOV = 60.0f;
 	float aspectRatio = 4.0f / 3.0f;
-	QMatrix4x4 getProjectionMatrix()
+	QMatrix4x4 getProjectionMatrix() const
 	{
 		QMatrix4x4 projection;
 		projection.perspective(FOV, aspectRatio, 0.1f, 100000.0f);

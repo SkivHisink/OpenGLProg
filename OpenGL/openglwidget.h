@@ -77,6 +77,7 @@ public slots:
 	void setLAttenuation(int val);
 	void setSAttenuation(int val);
 	void setMaterial(int val);
+	void setRS(int val);
 	void updateFPS();
 signals:
 	void xRotationChanged(int angle);
@@ -89,6 +90,7 @@ signals:
 	void specularStrengthChanged(int val);
 	void MaterialChanged(int val);
 	void DiffuseChanged(int val);
+	void RSChanged(int val);
 	void showFPS();
 
 private:
@@ -139,7 +141,7 @@ private:
 	Camera camera;
 	//light
 	Cube* light;
-	QVector3D lightPos = QVector3D(0.0f, 5.0f, -40.0f);
+	QVector3D lightPos = QVector3D(0.0f, 10.0f, -40.0f);
 	QVector3D lightColor = QVector3D(1.0f, 1.0f, 1.0f);
 	float ambientStrength = 0.1f;
 	float specularStrength = 0.5f;
@@ -153,7 +155,22 @@ private:
 	//
 	MaterialCollection::MaterialCollection mC;
 	MaterialCollection::Material material= mC.material_collection[MaterialCollection::Pearl];
-	int numb_of_mat = MaterialCollection::Pearl;
+	int numb_of_mat = MaterialCollection::Super_material;
+	//additional light
+	Cube* second_light;
+	QVector3D sl_lightPos = QVector3D(-20.0f, 5.0f, -4.0f);
+	QVector3D sl_lightColor = QVector3D(1.0f, 0.0f, 0.0f);
+	float sl_ambientStrength = 0.1f;
+	float sl_specularStrength = 0.5f;
+	float sl_diffuseStrength = 1;
+	float sl_attenuationConstant = 1.0;
+	float sl_attenuationLinear = 0.3;
+	float sl_attenuationSquare = 0.1;
+	float sl_ligth_x_move = 0.0f;
+	float sl_ligth_z_move = 0.0f;
+	float sl_ligth_y_move = 0.0f;
+	//rotate speed
+	float rotate_speed=1;
 };
 
 #endif // OPENGLWIDGET_H

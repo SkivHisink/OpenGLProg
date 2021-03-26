@@ -51,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent)
     //for Material
     connect(ui->MaterialSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setMaterial);
     connect(ui->widget, &OpenGLWidget::MaterialChanged, ui->MaterialSlider, &QSlider::setValue);
+    //for Material
+    connect(ui->RSSlider, &QSlider::valueChanged, ui->widget, &OpenGLWidget::setRS);
+    connect(ui->widget, &OpenGLWidget::RSChanged, ui->RSSlider, &QSlider::setValue);
 }
 
 MainWindow::~MainWindow()

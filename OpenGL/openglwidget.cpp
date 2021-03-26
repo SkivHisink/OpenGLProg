@@ -91,6 +91,13 @@ void OpenGLWidget::setMaterial(int val)
 		material = mC.material_collection[numb_of_mat];
 	}
 }
+void OpenGLWidget::setRS(int val)
+{
+	float tmp = ((float)val) / 10;
+	if (tmp != rotate_speed) {
+		rotate_speed = tmp;
+	}
+}
 void OpenGLWidget::middle_point(int i, int j, int* max_indx)
 {
 	auto& vert = cube->vertices;
@@ -186,18 +193,27 @@ void OpenGLWidget::initialize()
 
 	m_program->enableAttributeArray("normal");
 	m_program->setAttributeBuffer("normal", GL_FLOAT, 6 * sizeof(float), 3, cube->data_len * sizeof(float));
-	//key control
+
 
 	light = new Cube();
 	light->init(this);
-	light->setWhiteColot();
+	light->setColot(1,1,1);
 	m_program->enableAttributeArray("posAttr");
 	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, light->data_len * sizeof(float));
 
 	m_program->enableAttributeArray("colAttr");
 	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, light->data_len * sizeof(float));
+	//
+	second_light = new Cube();
+	second_light->init(this);
+	second_light->setColot(1,0,0);
+	m_program->enableAttributeArray("posAttr");
+	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, second_light->data_len * sizeof(float));
 
+	m_program->enableAttributeArray("colAttr");
+	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, second_light->data_len * sizeof(float));
 
+	//key control
 	keyboard->pressed_button.assign(60, false);
 	// light
 
@@ -367,11 +383,12 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("material.diffuse", material.diffuse[0], material.diffuse[1], material.diffuse[2]);
 	m_program->setUniformValue("material.specular", material.specular[0], material.specular[1], material.specular[2]);
 	m_program->setUniformValue("material.shininess", material.shininess);
+	m_program->setUniformValue("slightPos", sl_lightPos);
+	m_program->setUniformValue("slightColor", sl_lightColor);
 	cube->vao->bind();
 	cube->vbo->bind();
 
 	cube->vbo->write(0, cube->vertices.data(), cube->vertices.size() * sizeof(float));
-	//cube->vbo->allocate(cube->vertices.data(), cube->vertices.size() * sizeof(float));
 	for (auto trate : trate_cont) {
 		m_program->setUniformValue("model", trate);
 		glDrawElements(GL_TRIANGLES, cube->indices.size(), GL_UNSIGNED_SHORT, 0);
@@ -391,9 +408,32 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("view", camera.getViewMatrix());
 	m_program->setUniformValue("projection", camera.getProjectionMatrix());
 	m_program->setUniformValue("model", mat1);
+	m_program->setUniformValue("slightPos", lightPos);
+	m_program->setUniformValue("slightColor", lightColor);
+	m_program->setUniformValue("lightPos", lightPos);
+	m_program->setUniformValue("lightColor", lightColor);
 	glDrawElements(GL_TRIANGLES, light->indices.size(), GL_UNSIGNED_SHORT, 0);
 	light->vao->release();
 
+	second_light->vao->bind();
+	second_light->vbo->bind();
+	second_light->vbo->write(0, second_light->vertices.data(), second_light->vertices.size() * sizeof(float));
+	mat1 = QMatrix4x4();
+	mat1.setToIdentity();
+	mat1.translate(sl_lightPos);
+	m_program->setUniformValue("material.ambient", 1.0f, 1.0f, 1.0f);
+	m_program->setUniformValue("material.diffuse", 1.0f, 1.0f, 1.0f);
+	m_program->setUniformValue("material.specular", 1.0f, 1.0f, 1.0f);
+	m_program->setUniformValue("material.shininess", 0);
+	m_program->setUniformValue("view", camera.getViewMatrix());
+	m_program->setUniformValue("projection", camera.getProjectionMatrix());
+	m_program->setUniformValue("model", mat1);
+	m_program->setUniformValue("slightPos", sl_lightPos);
+	m_program->setUniformValue("slightColor", sl_lightColor);
+	m_program->setUniformValue("lightPos", sl_lightPos);
+	m_program->setUniformValue("lightColor", sl_lightColor);
+	glDrawElements(GL_TRIANGLES, second_light->indices.size(), GL_UNSIGNED_SHORT, 0);
+	second_light->vao->release();
 	m_program->release();
 	++m_frame;
 	//fps
@@ -540,15 +580,15 @@ void OpenGLWidget::keyevent()
 	}
 	if (keyboard->pressed_button[21])
 	{
-		rotation = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 1) * rotation;
+		rotation = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), rotate_speed) * rotation;
 	}
 	if (keyboard->pressed_button[22])
 	{
-		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 1) * rotation;
+		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), rotate_speed) * rotation;
 	}
 	if (keyboard->pressed_button[23])
 	{
-		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 1) * rotation;
+		rotation = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), rotate_speed) * rotation;
 	}
 	if (keyboard->pressed_button[24])//1 is red
 	{
