@@ -385,6 +385,10 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("material.shininess", material.shininess);
 	m_program->setUniformValue("slightPos", sl_lightPos);
 	m_program->setUniformValue("slightColor", sl_lightColor);
+	m_program->setUniformValue("dirLight.direction", camera.cameraPos);
+	m_program->setUniformValue("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	m_program->setUniformValue("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	m_program->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
 	cube->vao->bind();
 	cube->vbo->bind();
 
