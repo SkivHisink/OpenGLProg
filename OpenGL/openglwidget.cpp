@@ -188,16 +188,15 @@ void OpenGLWidget::initialize()
 	m_program->enableAttributeArray("posAttr");
 	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, cube->data_len * sizeof(float));
 
-	m_program->enableAttributeArray("colAttr");
-	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, cube->data_len * sizeof(float));
-
 	m_program->enableAttributeArray("normal");
-	m_program->setAttributeBuffer("normal", GL_FLOAT, 6 * sizeof(float), 3, cube->data_len * sizeof(float));
+	m_program->setAttributeBuffer("normal", GL_FLOAT, 3 * sizeof(float), 3, cube->data_len * sizeof(float));
 
+	m_program->enableAttributeArray("aTexCoords");
+	m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 5 * sizeof(float), 2, cube->data_len * sizeof(float));
 
 	light = new Cube();
 	light->init(this);
-	light->setColot(1,1,1);
+//	light->setColot(1,1,1);
 	m_program->enableAttributeArray("posAttr");
 	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, light->data_len * sizeof(float));
 
@@ -206,7 +205,7 @@ void OpenGLWidget::initialize()
 	//
 	second_light = new Cube();
 	second_light->init(this);
-	second_light->setColot(1,0,0);
+//	second_light->setColot(1,0,0);
 	m_program->enableAttributeArray("posAttr");
 	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, second_light->data_len * sizeof(float));
 
@@ -218,6 +217,9 @@ void OpenGLWidget::initialize()
 	// light
 
 	begin = std::chrono::high_resolution_clock::now();
+
+	//texture
+	initTextures();
 }
 
 void OpenGLWidget::initializeGL()
@@ -225,6 +227,20 @@ void OpenGLWidget::initializeGL()
 	initializeOpenGLFunctions();
 	setFocusPolicy(Qt::StrongFocus);
 
+}
+void OpenGLWidget::initTextures()
+{
+	// Load cube.png image
+	texture = new QOpenGLTexture(QImage(":/container2.png").mirrored());
+	// Set nearest filtering mode for texture minification
+	texture->setMinificationFilter(QOpenGLTexture::Nearest);
+
+	// Set bilinear filtering mode for texture magnification
+	texture->setMagnificationFilter(QOpenGLTexture::Linear);
+
+	// Wrap texture coordinates by repeating
+	// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
+	texture->setWrapMode(QOpenGLTexture::Repeat);
 }
 
 void OpenGLWidget::mousePressEvent(QMouseEvent* e)
@@ -237,7 +253,6 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* e)
 		mouseLastPosition = QVector2D(e->pos());
 	}
 }
-
 void OpenGLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
 	if (e->button() == Qt::RightButton) {
@@ -386,9 +401,10 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("slightPos", sl_lightPos);
 	m_program->setUniformValue("slightColor", sl_lightColor);
 	m_program->setUniformValue("dirLight.direction", camera.cameraPos);
-	m_program->setUniformValue("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	m_program->setUniformValue("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	m_program->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
+	m_program->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
 	m_program->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
+	m_program->setUniformValue("texture", 0);
 	cube->vao->bind();
 	cube->vbo->bind();
 
@@ -596,112 +612,35 @@ void OpenGLWidget::keyevent()
 	}
 	if (keyboard->pressed_button[24])//1 is red
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 1;
-			cube->vertices[i * cube->data_len + 4] = 0;
-			cube->vertices[i * cube->data_len + 5] = 0;
-		}
 	}
 	if (keyboard->pressed_button[25])//2 is green
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 0;
-			cube->vertices[i * cube->data_len + 4] = 1;
-			cube->vertices[i * cube->data_len + 5] = 0;
-		}
 	}
 	if (keyboard->pressed_button[26])//3 is blue
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 0;
-			cube->vertices[i * cube->data_len + 4] = 0;
-			cube->vertices[i * cube->data_len + 5] = 1;
-		}
 	}
 	if (keyboard->pressed_button[27])//4 is aqua
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 0;
-			cube->vertices[i * cube->data_len + 4] = 1;
-			cube->vertices[i * cube->data_len + 5] = 1;
-		}
 	}
 	if (keyboard->pressed_button[28])//5 is pink
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 1;
-			cube->vertices[i * cube->data_len + 4] = 0;
-			cube->vertices[i * cube->data_len + 5] = 1;
-		}
 	}
 	if (keyboard->pressed_button[29])//6 is yellow
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 1;
-			cube->vertices[i * cube->data_len + 4] = 1;
-			cube->vertices[i * cube->data_len + 5] = 0;
-		}
 	}
 	if (keyboard->pressed_button[30])//7 is black and white
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = (float)i / 8;
-			cube->vertices[i * cube->data_len + 4] = (float)i / 8;
-			cube->vertices[i * cube->data_len + 5] = (float)i / 8;
-		}
 	}
 	if (keyboard->pressed_button[31])//8 is inverse black and white
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 1.0 - (float)i / 8;
-			cube->vertices[i * cube->data_len + 4] = 1.0 - (float)i / 8;
-			cube->vertices[i * cube->data_len + 5] = 1.0 - (float)i / 8;
-		}
 	}
 	if (keyboard->pressed_button[32])//9 is color inversion
 	{
-		for (int i = 0; i < cube->vertices.size() / cube->data_len; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] = 1.0 - cube->vertices[i * cube->data_len + 3];
-			cube->vertices[i * cube->data_len + 4] = 1.0 - cube->vertices[i * cube->data_len + 4];
-			cube->vertices[i * cube->data_len + 5] = 1.0 - cube->vertices[i * cube->data_len + 5];
-		}
-		keyboard->pressed_button[32] = !keyboard->pressed_button[32];
+		
 	}
-	if (false)//return standart colors
+	if (keyboard->pressed_button[33])//return standart colors
 	{
-		//keyboard->pressed_button[33]
-		int a = 0;
-		int b = 0;
-		int c = 0;
-		for (int i = 0; i < 8; ++i)
-		{
-			cube->vertices[i * cube->data_len + 5] = a;
-			cube->vertices[i * cube->data_len + 4] = b;
-			cube->vertices[i * cube->data_len + 3] = c;
-			++a;
-			if (a == 2) {
-				a = 0;
-				++b;
-				if (b == 2) {
-					b = 0;
-					++c;
-				}
-			}
-		}
-		for (int i = 8; i < cube->vertices.size() / cube->data_len; ++i) {
-			cube->vertices[(i + 0) * cube->data_len + 3] = abs(cube->vertices[(i - 5) * cube->data_len + 3] + cube->vertices[(i - cube->data_len) * cube->data_len + 3]) / 2;
-			cube->vertices[(i + 0) * cube->data_len + 4] = abs(cube->vertices[(i - 5) * cube->data_len + 4] + cube->vertices[(i - cube->data_len) * cube->data_len + 4]) / 2;
-			cube->vertices[(i + 0) * cube->data_len + 5] = abs(cube->vertices[(i - 5) * cube->data_len + 5] + cube->vertices[(i - cube->data_len) * cube->data_len + 5]) / 2;
-		}
+	
 	}
 	if (keyboard->pressed_button[37])
 	{

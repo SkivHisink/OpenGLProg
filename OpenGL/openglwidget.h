@@ -66,6 +66,8 @@ protected:
 	void paintGL() override;
 	void setAnimating(bool animating);
 	void keyevent();
+
+	void initTextures();
 public slots:
 	void setXRotation(int angle);
 	void setYRotation(int angle);
@@ -171,6 +173,8 @@ private:
 	float sl_ligth_y_move = 0.0f;
 	//rotate speed
 	float rotate_speed=1;
+	//texture
+	QOpenGLTexture* texture = nullptr;
 };
 
 #endif // OPENGLWIDGET_H
