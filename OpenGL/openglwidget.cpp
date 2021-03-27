@@ -192,7 +192,7 @@ void OpenGLWidget::initialize()
 	m_program->setAttributeBuffer("normal", GL_FLOAT, 3 * sizeof(float), 3, cube->data_len * sizeof(float));
 
 	m_program->enableAttributeArray("aTexCoords");
-	m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 5 * sizeof(float), 2, cube->data_len * sizeof(float));
+	m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 6 * sizeof(float), 2, cube->data_len * sizeof(float));
 
 	light = new Cube();
 	light->init(this);
@@ -231,7 +231,7 @@ void OpenGLWidget::initializeGL()
 void OpenGLWidget::initTextures()
 {
 	// Load cube.png image
-	texture = new QOpenGLTexture(QImage(":/container2.png").mirrored());
+	texture = new QOpenGLTexture(QImage("container2.png").mirrored());
 	// Set nearest filtering mode for texture minification
 	texture->setMinificationFilter(QOpenGLTexture::Nearest);
 
@@ -404,6 +404,8 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
 	m_program->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
 	m_program->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
+	glActiveTexture(GL_TEXTURE0);
+	texture->bind();
 	m_program->setUniformValue("texture", 0);
 	cube->vao->bind();
 	cube->vbo->bind();

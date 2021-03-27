@@ -18,7 +18,7 @@ uniform vec3 strength;
 uniform vec3 attenuationParam;
 uniform vec3 slightPos;
 uniform vec3 slightColor;
-uniform vec2 texture;
+uniform sampler2D texture;
 struct DirLight {
     vec3 direction;
     vec3 ambient;
@@ -74,8 +74,8 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // combine
-    vec3 ambient  = light.ambient  * material.diffuse);//vec3(texture(material.diffuse, TexCoords))
-    vec3 diffuse  = light.diffuse  * diff * material.diffuse);//vec3(texture(material.diffuse, TexCoords))
+    vec3 ambient  = light.ambient  * material.diffuse;//vec3(texture(material.diffuse, TexCoords))
+    vec3 diffuse  = light.diffuse  * diff * material.diffuse;//vec3(texture(material.diffuse, TexCoords))
     vec3 specular = light.specular * spec * material.specular;//vec3(texture(material.specular, TexCoords))
     return (ambient + diffuse + specular);
 } 
