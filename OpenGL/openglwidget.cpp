@@ -232,15 +232,19 @@ void OpenGLWidget::initTextures()
 {
 	// Load cube.png image
 	texture = new QOpenGLTexture(QImage("container2.png").mirrored());
+	texture2 = new QOpenGLTexture(QImage("container2_specular.png").mirrored());
 	// Set nearest filtering mode for texture minification
 	texture->setMinificationFilter(QOpenGLTexture::Nearest);
+	texture2->setMinificationFilter(QOpenGLTexture::Nearest);
 
 	// Set bilinear filtering mode for texture magnification
 	texture->setMagnificationFilter(QOpenGLTexture::Linear);
+	texture2->setMagnificationFilter(QOpenGLTexture::Linear);
 
 	// Wrap texture coordinates by repeating
 	// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
 	texture->setWrapMode(QOpenGLTexture::Repeat);
+	texture2->setWrapMode(QOpenGLTexture::Repeat);
 }
 
 void OpenGLWidget::mousePressEvent(QMouseEvent* e)
@@ -329,6 +333,7 @@ void OpenGLWidget::paintGL()
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(120.0f / 256, 120.0f / 256, 120.0f / 256, 0.5f);
 	if (depth_state) {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_LIGHTING);
@@ -357,8 +362,8 @@ void OpenGLWidget::paintGL()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 	glShadeModel(GL_SMOOTH);
-	std::vector<GLfloat> ambient_matrial_red_plastic = { 0,0,0 };
-	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_matrial_red_plastic.data());
+	//std::vector<GLfloat> ambient_matrial_red_plastic = { 0,0,0 };
+	//glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_matrial_red_plastic.data());
 	m_program->bind();
 	QMatrix4x4 matrix;
 	std::vector<QMatrix4x4> trate_cont;//translate+rotate=trate
@@ -395,8 +400,12 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
 	m_program->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
 	m_program->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
-	m_program->setUniformValue("material.diffuse", material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-	m_program->setUniformValue("material.specular", material.specular[0], material.specular[1], material.specular[2]);
+	glActiveTexture(GL_TEXTURE0);
+	texture->bind();
+	m_program->setUniformValue("material.diffuse", 0);
+	glActiveTexture(GL_TEXTURE1);
+	texture2->bind();
+	m_program->setUniformValue("material.specular", 1);
 	m_program->setUniformValue("material.shininess", material.shininess);
 	m_program->setUniformValue("slightPos", sl_lightPos);
 	m_program->setUniformValue("slightColor", sl_lightColor);
@@ -404,9 +413,8 @@ void OpenGLWidget::paintGL()
 	m_program->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
 	m_program->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
 	m_program->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
-	glActiveTexture(GL_TEXTURE0);
-	texture->bind();
-	m_program->setUniformValue("texture", 0);
+	
+	//m_program->setUniformValue("texture", 0);
 	cube->vao->bind();
 	cube->vbo->bind();
 

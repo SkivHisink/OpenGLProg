@@ -5,8 +5,8 @@ in vec3 FragPos;
 out vec4 fragColor;
 struct Material {
     vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    sampler2D diffuse;
+    sampler2D specular;
     float shininess;
 };	
 uniform Material material; 
@@ -18,7 +18,7 @@ uniform vec3 strength;
 uniform vec3 attenuationParam;
 uniform vec3 slightPos;
 uniform vec3 slightColor;
-uniform sampler2D texture;
+//uniform sampler2D textureImg;
 struct DirLight {
     vec3 direction;
     vec3 ambient;
@@ -46,21 +46,21 @@ vec3 TwoPointLightSources(vec3 objectColor, vec3 norm, vec3 viewDir)
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
    // vec3 mat_diff=vec3(texture(material.diffuse, TexCoords));
-    vec3 diffuse = deffuseStrength *  (lightColor * (diff * material.diffuse)) * Attenuation(length(lightPos - FragPos));
+    vec3 diffuse = deffuseStrength *  (lightColor * (diff * vec3(texture(material.diffuse, TexCoords)))) * Attenuation(length(lightPos - FragPos));
     //second light
     vec3 slightDir = normalize(slightPos - FragPos);
     float sdiff = max(dot(norm, slightDir), 0.0);
     diffuse = diffuse + 
-    deffuseStrength *  (slightColor * sdiff * material.diffuse) * Attenuation(length(slightPos - FragPos));
+    deffuseStrength *  (slightColor * sdiff * vec3(texture(material.diffuse, TexCoords))) * Attenuation(length(slightPos - FragPos));
     // Specular
     float specularStrength =strength.y;
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = specularStrength * (lightColor  * (spec * material.specular));  
+    vec3 specular = specularStrength * (lightColor  * (spec * vec3(texture(material.specular, TexCoords))));  
     //second light
     reflectDir = reflect(-slightDir, norm);
     spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    specular = specular + specularStrength * (slightColor  * (spec * material.specular));
+    specular = specular + specularStrength * (slightColor  * (spec * vec3(texture(material.specular, TexCoords))));
     vec3 result = (ambient + diffuse + specular) ;//* objectColor
     return result;
 }
@@ -74,9 +74,9 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // combine
-    vec3 ambient  = light.ambient  * material.diffuse;//vec3(texture(material.diffuse, TexCoords))
-    vec3 diffuse  = light.diffuse  * diff * material.diffuse;//vec3(texture(material.diffuse, TexCoords))
-    vec3 specular = light.specular * spec * material.specular;//vec3(texture(material.specular, TexCoords))
+    vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));//vec3(texture(material.diffuse, TexCoords))
+    vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));//vec3(texture(material.diffuse, TexCoords))
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));//vec3(texture(material.specular, TexCoords))
     return (ambient + diffuse + specular);
 } 
 
@@ -89,5 +89,5 @@ void main() {
     //result += CalcDirLight(dirLight, norm, viewDir);
     result += TwoPointLightSources(objectColor, norm, viewDir);
  
-    fragColor = texture2D(texture, TexCoords);//vec4(result, 1.0f)
+    fragColor =  vec4(result, 1.0f);//vec4(result, 1.0f)
 }

@@ -175,6 +175,7 @@ private:
 	float rotate_speed=1;
 	//texture
 	QOpenGLTexture* texture = nullptr;
+	QOpenGLTexture* texture2 = nullptr;
 };
 
 #endif // OPENGLWIDGET_H
