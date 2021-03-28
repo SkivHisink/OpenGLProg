@@ -24,6 +24,11 @@ protected:
 	QOpenGLBuffer* ibo = nullptr;
 	QOpenGLShaderProgram* m_program = nullptr;
 public:
+	~SceneObject()
+	{
+		vbo->destroy();
+		ibo->destroy();
+	}
 	void initNormal();
 	void initObj(QObject* f);
 	void initProg(QObject* widget);

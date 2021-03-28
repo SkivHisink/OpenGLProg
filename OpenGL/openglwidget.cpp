@@ -390,12 +390,6 @@ OpenGLWidget::~OpenGLWidget()
 {
 	makeCurrent();
 	doneCurrent();
-	cube->getVbo()->destroy();
-	cube->getIbo()->destroy();
-	light->getVbo()->destroy();
-	light->getIbo()->destroy();
-	second_light->getIbo()->destroy();
-	second_light->getVbo()->destroy();
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
