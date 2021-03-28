@@ -83,7 +83,6 @@ public:
 		ibo->setUsagePattern(QOpenGLBuffer::DynamicDraw);
 		ibo->bind();
 		ibo->allocate(indices.data(), indices.size() * sizeof(GLushort));
-
 	}
 	void init_normal()
 	{

@@ -206,12 +206,14 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwindow.cpp" />
     <ClCompile Include="openglwidget.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="KeyBoard.h" />
     <ClInclude Include="MaterialCollection.h" />
+    <ClInclude Include="SceneObject.h" />
     <QtMoc Include="mainwindow.h">
     </QtMoc>
     <QtMoc Include="openglwidget.h">

@@ -132,7 +132,7 @@ int number_of_triangle_breaking(int num)
 void OpenGLWidget::initialize()
 {
 	m_program = new QOpenGLShaderProgram(this);
-	m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "lightFragment.vs");
+	m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "vertex.vs");
 	m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "fragment.fs");
 	m_program->link();
 	auto log = m_program->log();
@@ -488,7 +488,7 @@ OpenGLWidget::OpenGLWidget()
 	QSurfaceFormat format;
 	format.setSamples(16);
 	format.setVersion(3, 3);
-	format.setProfile(QSurfaceFormat::CoreProfile);
+	format.setProfile(QSurfaceFormat::CompatibilityProfile);
 
 	setFormat(format);
 }
