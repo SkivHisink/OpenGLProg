@@ -6,7 +6,7 @@
 #include <QScreen>
 #include <QtMath>
 #include <QKeyEvent>
-
+#include "AssimpLoader.h"
 static void qNormalizeAngle(int& angle)
 {
 	while (angle < 0)
@@ -102,6 +102,8 @@ void OpenGLWidget::setRS(int val)
 void OpenGLWidget::initialize()
 {
 	//main object of scene
+	AssimpLoader load;
+	load.loadModel("materials\\MeshCube.obj");
 	cube = new Cube();
 	cube->initProg(this);
 	cube->initShaders("shaders\\ObjTexture.vs", "shaders\\ObjWithLightAndTexture.fs");

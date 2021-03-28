@@ -72,9 +72,29 @@ std::vector<GLushort> SceneObject::getIndices()
 	return indices;
 }
 
-int SceneObject::getDataLen()
+const int SceneObject::getDataLen()
 {
 	return dataLen;
+}
+
+QOpenGLShaderProgram* SceneObject::getProgram()
+{
+	return m_program;
+}
+
+QOpenGLVertexArrayObject* SceneObject::getVao()
+{
+	return vao;
+}
+
+QOpenGLBuffer* SceneObject::getVbo()
+{
+	return vbo;
+}
+
+QOpenGLBuffer* SceneObject::getIbo()
+{
+	return ibo;
 }
 
 void SceneObject::enableAndSetAttribute()

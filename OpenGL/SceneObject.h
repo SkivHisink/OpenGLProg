@@ -37,10 +37,10 @@ public:
 	//
 	std::vector<float> getVertices();
 	std::vector<GLushort> getIndices();
-	int getDataLen();
-	QOpenGLShaderProgram* getProgram() { return m_program; }
-	QOpenGLVertexArrayObject* getVao() { return vao; }
-	QOpenGLBuffer* getVbo() { return vbo; }
-	QOpenGLBuffer* getIbo() { return ibo; }
+	const int getDataLen();
+	QOpenGLShaderProgram* getProgram();
+	QOpenGLVertexArrayObject* getVao();
+	QOpenGLBuffer* getVbo();
+	QOpenGLBuffer* getIbo();
 	void enableAndSetAttribute();
 };
