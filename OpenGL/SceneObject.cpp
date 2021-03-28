@@ -45,7 +45,7 @@ void SceneObject::initObj(QObject* f)
 	ibo->allocate(indices.data(), indices.size() * sizeof(GLushort));
 }
 
-void SceneObject::initProg(QOpenGLWidget* widget)
+void SceneObject::initProg(QObject* widget)
 {
 	m_program = new QOpenGLShaderProgram(widget);
 	
@@ -75,4 +75,17 @@ std::vector<GLushort> SceneObject::getIndices()
 int SceneObject::getDataLen()
 {
 	return dataLen;
+}
+
+void SceneObject::enableAndSetAttribute()
+{
+	m_program->enableAttributeArray("posAttr");
+	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, dataLen * sizeof(float));
+
+	m_program->enableAttributeArray("normal");
+	m_program->setAttributeBuffer("normal", GL_FLOAT, 3 * sizeof(float), 3, dataLen * sizeof(float));
+
+	m_program->enableAttributeArray("aTexCoords");
+	m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 6 * sizeof(float), 2, dataLen * sizeof(float));
+
 }

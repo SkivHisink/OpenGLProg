@@ -1,17 +1,9 @@
 #ifndef OPENGLWIDGET_H
 #define OPENGLWIDGET_H
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QMatrix4x4>
-#include <QQuaternion>
-#include <QVector2D>
 #include <QBasicTimer>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLTexture>
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
 //
-#include "cube.h"
+#include "Cube.h"
 #include "Camera.h"
 #include "KeyBoard.h"
 #include <QSlider>
@@ -96,11 +88,9 @@ signals:
 	void showFPS();
 
 private:
-	void middle_point(int i, int j, int* max_indx);
 	QBasicTimer timer;
 
 	GLfloat color_change = 0.0f;
-	QOpenGLShaderProgram* m_program = nullptr;
 	QVector2D mousePressPosition;
 	QVector2D mouseLastPosition;
 	int m_frame = 0;

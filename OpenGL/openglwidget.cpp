@@ -5,7 +5,6 @@
 #include <QOpenGLShaderProgram>
 #include <QScreen>
 #include <QtMath>
-#include <QMouseEvent>
 #include <QKeyEvent>
 
 static void qNormalizeAngle(int& angle)
@@ -98,120 +97,37 @@ void OpenGLWidget::setRS(int val)
 		rotate_speed = tmp;
 	}
 }
-void OpenGLWidget::middle_point(int i, int j, int* max_indx)
-{
-	auto& vert = cube->vertices;
-	auto ver_1_1 = vert[(i)*cube->data_len + 0];
-	auto ver_1_2 = vert[(j)*cube->data_len + 0];
-	auto ver_2_1 = vert[(i)*cube->data_len + 1];
-	auto ver_2_2 = vert[(j)*cube->data_len + 1];
-	auto ver_3_1 = vert[(i)*cube->data_len + 2];
-	auto ver_3_2 = vert[(j)*cube->data_len + 2];
 
-	vert.push_back((ver_1_1 + ver_1_2) / 2);
-	vert.push_back((ver_2_1 + ver_2_2) / 2);
-	vert.push_back((ver_3_1 + ver_3_2) / 2);
-	vert.push_back(abs(vert[(i)*cube->data_len + 3] + vert[(j)*cube->data_len + 3]) / 2);
-	vert.push_back(abs(vert[(i)*cube->data_len + 4] + vert[(j)*cube->data_len + 4]) / 2);
-	vert.push_back(abs(vert[(i)*cube->data_len + 5] + vert[(j)*cube->data_len + 5]) / 2);
-	vert.push_back(abs(vert[(i)*cube->data_len + 3] + vert[(j)*cube->data_len + 3]) / 2);
-	vert.push_back(abs(vert[(i)*cube->data_len + 4] + vert[(j)*cube->data_len + 4]) / 2);
-	vert.push_back(abs(vert[(i)*cube->data_len + 5] + vert[(j)*cube->data_len + 5]) / 2);
-
-	++* max_indx;
-}
-int number_of_triangle_breaking(int num)
-{
-	int numb = 0;
-	for (int i = 0; i < num; ++i) {
-		numb = numb + static_cast<int>(6 * pow(2, 2 * i + 1));
-	}
-	return numb;
-}
 
 void OpenGLWidget::initialize()
 {
-	m_program = new QOpenGLShaderProgram(this);
-	m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "vertex.vs");
-	m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "fragment.fs");
-	m_program->link();
-	auto log = m_program->log();
+	//main object of scene
+	cube = new Cube();
+	cube->initProg(this);
+	cube->initShaders("shaders\\ObjTexture.vs", "shaders\\ObjWithLightAndTexture.fs");
+	//light
+	light = new Cube();
+	light->initProg(this);
+	light->initShaders("shaders\\SimpleObj.vs", "shaders\\SimpleObj.fs");
+	second_light = new Cube();
+	second_light->initProg(this);
+	second_light->initShaders("shaders\\SimpleObj.vs", "shaders\\SimpleObj.fs");
+	//init keyboard control
 	keyboard = new KeyBoard();
-	//m_program->log();
 	// Use QBasicTimer because its faster than QTimer
 	timer.start(12, this);
 	//
-	cube = new Cube();
-	int max_indx = 23;
-	auto& indxs = cube->indices;
-	int numb_of_crop = number_of_triangle_breaking(0);//12 |60|252|1020|formula: prev+6*2^(iter_num+2)
-	std::vector<float> new_vert;
-	for (int i = 0; i < numb_of_crop; ++i) {
-		middle_point(indxs[i * 3 + 0], indxs[i * 3 + 1], &max_indx);
-		middle_point(indxs[i * 3 + 0], indxs[i * 3 + 2], &max_indx);
-		middle_point(indxs[i * 3 + 1], indxs[i * 3 + 2], &max_indx);
-		//
-		for (int j = 0; j < 3; ++j)
-		{
-			for (int k = 0; k < 9; ++k)
-			{
-				cube->vertices.push_back(cube->vertices[indxs[i * 3 + j] + k]);
 
-			}
-		}
-		max_indx += 3;
-		cube->indices.push_back(max_indx - 2);
-		cube->indices.push_back(max_indx - 5);
-		cube->indices.push_back(max_indx - 4);
-		//
-		cube->indices.push_back(max_indx - 5);
-		cube->indices.push_back(max_indx - 1);
-		cube->indices.push_back(max_indx - 3);
-		//									+1
-		cube->indices.push_back(max_indx - 3);
-		cube->indices.push_back(max_indx - 4);
-		cube->indices.push_back(max_indx - 5);
-		//									+1
-		cube->indices.push_back(max_indx - 4);
-		cube->indices.push_back(max_indx - 3);
-		cube->indices.push_back(max_indx);
 
-	}
-	for (int i = 0; i < numb_of_crop; ++i)
-	{
-		cube->indices.erase(cube->indices.begin());
-		cube->indices.erase(cube->indices.begin());
-		cube->indices.erase(cube->indices.begin());
-	}
-	cube->init(this);
-	cube->init_normal();
-	m_program->enableAttributeArray("posAttr");
-	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, cube->data_len * sizeof(float));
-
-	m_program->enableAttributeArray("normal");
-	m_program->setAttributeBuffer("normal", GL_FLOAT, 3 * sizeof(float), 3, cube->data_len * sizeof(float));
-
-	m_program->enableAttributeArray("aTexCoords");
-	m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 6 * sizeof(float), 2, cube->data_len * sizeof(float));
-
-	light = new Cube();
-	light->init(this);
-//	light->setColot(1,1,1);
-	m_program->enableAttributeArray("posAttr");
-	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, light->data_len * sizeof(float));
-
-	m_program->enableAttributeArray("colAttr");
-	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, light->data_len * sizeof(float));
-	//
-	second_light = new Cube();
-	second_light->init(this);
-//	second_light->setColot(1,0,0);
-	m_program->enableAttributeArray("posAttr");
-	m_program->setAttributeBuffer("posAttr", GL_FLOAT, 0, 3, second_light->data_len * sizeof(float));
-
-	m_program->enableAttributeArray("colAttr");
-	m_program->setAttributeBuffer("colAttr", GL_FLOAT, 3 * sizeof(float), 3, second_light->data_len * sizeof(float));
-
+	cube->initObj(this);
+	cube->initNormal();
+	cube->enableAndSetAttribute();
+	light->initObj(this);
+	light->initNormal();
+	light->enableAndSetAttribute();
+	second_light->initObj(this);
+	second_light->initNormal();
+	second_light->enableAndSetAttribute();
 	//key control
 	keyboard->pressed_button.assign(60, false);
 	// light
@@ -364,7 +280,7 @@ void OpenGLWidget::paintGL()
 	glShadeModel(GL_SMOOTH);
 	//std::vector<GLfloat> ambient_matrial_red_plastic = { 0,0,0 };
 	//glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_matrial_red_plastic.data());
-	m_program->bind();
+	cube->getProgram()->bind();
 	QMatrix4x4 matrix;
 	std::vector<QMatrix4x4> trate_cont;//translate+rotate=trate
 	for (int i = 0; i < nox; ++i) {
@@ -383,88 +299,65 @@ void OpenGLWidget::paintGL()
 	matrix.translate(x_coord, y_coord, z_coord);
 	//keyEvent
 	keyevent();
-	if (color_change != 0) {
-		for (int i = 0; i < 8; ++i)
-		{
-			cube->vertices[i * cube->data_len + 3] += color_change;
-			cube->vertices[i * cube->data_len + 4] += color_change;
-			cube->vertices[i * cube->data_len + 5] += color_change;
-		}
-		color_change = 0;
-	}
-	m_program->setUniformValue("viewPos", camera.cameraPos);
-	m_program->setUniformValue("lightPos", lightPos);
-	m_program->setUniformValue("lightColor", lightColor);
-	m_program->setUniformValue("view", camera.getViewMatrix());
-	m_program->setUniformValue("projection", camera.getProjectionMatrix());
-	m_program->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
-	m_program->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
-	m_program->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
+	cube->getProgram()->setUniformValue("viewPos", camera.cameraPos);
+	cube->getProgram()->setUniformValue("lightPos", lightPos);
+	cube->getProgram()->setUniformValue("lightColor", lightColor);
+	cube->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	cube->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	cube->getProgram()->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
+	cube->getProgram()->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
+	cube->getProgram()->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
 	glActiveTexture(GL_TEXTURE0);
 	texture->bind();
-	m_program->setUniformValue("material.diffuse", 0);
+	cube->getProgram()->setUniformValue("material.diffuse", 0);
 	glActiveTexture(GL_TEXTURE1);
 	texture2->bind();
-	m_program->setUniformValue("material.specular", 1);
-	m_program->setUniformValue("material.shininess", material.shininess);
-	m_program->setUniformValue("slightPos", sl_lightPos);
-	m_program->setUniformValue("slightColor", sl_lightColor);
-	m_program->setUniformValue("dirLight.direction", camera.cameraPos);
-	m_program->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
-	m_program->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
-	m_program->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
-	
-	//m_program->setUniformValue("texture", 0);
-	cube->vao->bind();
-	cube->vbo->bind();
+	cube->getProgram()->setUniformValue("material.specular", 1);
+	cube->getProgram()->setUniformValue("material.shininess", material.shininess);
+	cube->getProgram()->setUniformValue("slightPos", sl_lightPos);
+	cube->getProgram()->setUniformValue("slightColor", sl_lightColor);
+	cube->getProgram()->setUniformValue("dirLight.direction", camera.cameraPos);
+	cube->getProgram()->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
+	cube->getProgram()->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
+	cube->getProgram()->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-	cube->vbo->write(0, cube->vertices.data(), cube->vertices.size() * sizeof(float));
+	cube->getVao()->bind();
+	cube->getVbo()->bind();
+
+	cube->getVbo()->write(0, cube->getVertices().data(), cube->getVertices().size() * sizeof(float));
 	for (auto trate : trate_cont) {
-		m_program->setUniformValue("model", trate);
-		glDrawElements(GL_TRIANGLES, cube->indices.size(), GL_UNSIGNED_SHORT, 0);
+		cube->getProgram()->setUniformValue("model", trate);
+		glDrawElements(GL_TRIANGLES, cube->getIndices().size(), GL_UNSIGNED_SHORT, 0);
 	}
-	cube->vao->release();
-
-	light->vao->bind();
-	light->vbo->bind();
-	light->vbo->write(0, light->vertices.data(), light->vertices.size() * sizeof(float));
+	cube->getVao()->release();
+	cube->getProgram()->release();
+	light->getProgram()->bind();
 	QMatrix4x4 mat1 = QMatrix4x4();
 	mat1.setToIdentity();
 	mat1.translate(lightPos);
-	m_program->setUniformValue("material.ambient", 1.0f, 1.0f, 1.0f);
-	m_program->setUniformValue("material.diffuse", 1.0f, 1.0f, 1.0f);
-	m_program->setUniformValue("material.specular", 1.0f, 1.0f, 1.0f);
-	m_program->setUniformValue("material.shininess", 0);
-	m_program->setUniformValue("view", camera.getViewMatrix());
-	m_program->setUniformValue("projection", camera.getProjectionMatrix());
-	m_program->setUniformValue("model", mat1);
-	m_program->setUniformValue("slightPos", lightPos);
-	m_program->setUniformValue("slightColor", lightColor);
-	m_program->setUniformValue("lightPos", lightPos);
-	m_program->setUniformValue("lightColor", lightColor);
-	glDrawElements(GL_TRIANGLES, light->indices.size(), GL_UNSIGNED_SHORT, 0);
-	light->vao->release();
+	light->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	light->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	light->getProgram()->setUniformValue("model", mat1);
+	light->getProgram()->setUniformValue("color", 1, 1, 1);
+	light->getVao()->bind();
+	light->getVbo()->bind();
+	light->getVbo()->write(0, light->getVertices().data(), light->getVertices().size() * sizeof(float));
+	glDrawElements(GL_TRIANGLES, light->getIndices().size(), GL_UNSIGNED_SHORT, 0);
+	light->getVao()->release();
 
-	second_light->vao->bind();
-	second_light->vbo->bind();
-	second_light->vbo->write(0, second_light->vertices.data(), second_light->vertices.size() * sizeof(float));
+	second_light->getProgram()->bind();
 	mat1 = QMatrix4x4();
 	mat1.setToIdentity();
 	mat1.translate(sl_lightPos);
-	m_program->setUniformValue("material.ambient", 1.0f, 1.0f, 1.0f);
-	m_program->setUniformValue("material.diffuse", 1.0f, 1.0f, 1.0f);
-	m_program->setUniformValue("material.specular", 1.0f, 1.0f, 1.0f);
-	m_program->setUniformValue("material.shininess", 0);
-	m_program->setUniformValue("view", camera.getViewMatrix());
-	m_program->setUniformValue("projection", camera.getProjectionMatrix());
-	m_program->setUniformValue("model", mat1);
-	m_program->setUniformValue("slightPos", sl_lightPos);
-	m_program->setUniformValue("slightColor", sl_lightColor);
-	m_program->setUniformValue("lightPos", sl_lightPos);
-	m_program->setUniformValue("lightColor", sl_lightColor);
-	glDrawElements(GL_TRIANGLES, second_light->indices.size(), GL_UNSIGNED_SHORT, 0);
-	second_light->vao->release();
-	m_program->release();
+	second_light->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	second_light->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	second_light->getProgram()->setUniformValue("model", mat1);
+	second_light->getProgram()->setUniformValue("color", 1, 0, 0);
+	second_light->getVao()->bind();
+	second_light->getVbo()->bind();
+	second_light->getVbo()->write(0, second_light->getVertices().data(), second_light->getVertices().size() * sizeof(float));
+	glDrawElements(GL_TRIANGLES, second_light->getIndices().size(), GL_UNSIGNED_SHORT, 0);
+	second_light->getVao()->release();
 	++m_frame;
 	//fps
 	auto timet = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - begin);
@@ -497,10 +390,12 @@ OpenGLWidget::~OpenGLWidget()
 {
 	makeCurrent();
 	doneCurrent();
-	cube->vbo->destroy();
-	cube->ibo->destroy();
-	light->vbo->destroy();
-	light->ibo->destroy();
+	cube->getVbo()->destroy();
+	cube->getIbo()->destroy();
+	light->getVbo()->destroy();
+	light->getIbo()->destroy();
+	second_light->getIbo()->destroy();
+	second_light->getVbo()->destroy();
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
@@ -646,11 +541,11 @@ void OpenGLWidget::keyevent()
 	}
 	if (keyboard->pressed_button[32])//9 is color inversion
 	{
-		
+
 	}
 	if (keyboard->pressed_button[33])//return standart colors
 	{
-	
+
 	}
 	if (keyboard->pressed_button[37])
 	{
