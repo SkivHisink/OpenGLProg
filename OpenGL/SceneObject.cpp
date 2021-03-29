@@ -1,4 +1,4 @@
-#include <SceneObject.h>
+#include "SceneObject.h"
 
 void SceneObject::initNormal()
 {
