@@ -2,6 +2,8 @@
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec3 bitang;
+in vec3 tang;
 out vec4 fragColor;
 struct Material {
     vec3 ambient;
@@ -28,7 +30,7 @@ struct DirLight {
 uniform DirLight dirLight;
 
 in vec2 TexCoords;
-
+uniform sampler2D textureNormalMap;
 float Attenuation(float dist)
 {
   return 1.0f/(attenuationParam.x+attenuationParam.y*dist+attenuationParam.z*dist*dist);
@@ -40,7 +42,7 @@ vec3 TwoPointLightSources(vec3 objectColor, vec3 norm, vec3 viewDir)
     float ambientStrength = strength.x;
     vec3 ambient = ambientStrength * (lightColor  * material.ambient);
     //for second light
-  	ambient = ambient + ambientStrength * (slightColor  * material.ambient);
+  	//ambient = ambient + ambientStrength * (slightColor  * material.ambient);
     // Diffuse 
     float deffuseStrength = strength.z;
     vec3 lightDir = normalize(lightPos - FragPos);
@@ -50,8 +52,7 @@ vec3 TwoPointLightSources(vec3 objectColor, vec3 norm, vec3 viewDir)
     //second light
     vec3 slightDir = normalize(slightPos - FragPos);
     float sdiff = max(dot(norm, slightDir), 0.0);
-    diffuse = diffuse + 
-    deffuseStrength *  (slightColor * sdiff * vec3(texture(material.diffuse, TexCoords))) * Attenuation(length(slightPos - FragPos));
+    //diffuse = diffuse + deffuseStrength *  (slightColor * sdiff * vec3(texture(material.diffuse, TexCoords))) * Attenuation(length(slightPos - FragPos));
     // Specular
     float specularStrength =strength.y;
     vec3 reflectDir = reflect(-lightDir, norm);  
@@ -60,7 +61,7 @@ vec3 TwoPointLightSources(vec3 objectColor, vec3 norm, vec3 viewDir)
     //second light
     reflectDir = reflect(-slightDir, norm);
     spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    specular = specular + specularStrength * (slightColor  * (spec * vec3(texture(material.specular, TexCoords))));
+    //specular = specular + specularStrength * (slightColor  * (spec * vec3(texture(material.specular, TexCoords))));
     vec3 result = (ambient + diffuse + specular) ;//* objectColor
     return result;
 }
@@ -80,9 +81,21 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     return (ambient + diffuse + specular);
 } 
 
+vec3 calcMormalFromNormalmap(vec3 localNormal, vec2 uv){
+    // Рассчитываем базисные вектора с.о. нормали (tangent space)
+    vec3 n = normalize( localNormal.xyz );
+    // Достаём нормаль из карты высот
+    vec3 normal = texture(textureNormalMap, uv ).rgb;
+    normal = normalize( normal * 2.0 - 1.0 );
+    // Рассчитываем результирующую нормаль
+    vec3 resultingNormal = normalize( normal.x * normalize(tang) + normal.y * normalize(bitang) + normal.z * n );
+    return resultingNormal;
+}
+
 void main() {
     vec3 objectColor = vec3(0.0f, 0.0f, 0.0f);//col
-    vec3 norm = normalize(Normal);
+    vec3 norm = calcMormalFromNormalmap(normalize(Normal), TexCoords);//calcMormalFromNormalmap(normalize(Normal), TexCoords)
+    
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec3 result = vec3(0.0, 0.0, 0.0);

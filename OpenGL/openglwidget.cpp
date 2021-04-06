@@ -43,42 +43,42 @@ void OpenGLWidget::setZRotation(int angle)
 }
 void OpenGLWidget::setAmbientStregth(int val)
 {
-	float tmp = ((float)val) / 1000;
+	float tmp = static_cast<float>(val) / 1000;
 	if (tmp != ambientStrength) {
 		ambientStrength = tmp;
 	}
 }
 void OpenGLWidget::setSpecularStrength(int val)
 {
-	float tmp = ((float)val) / 100;
+	float tmp = static_cast<float>(val) / 100;
 	if (tmp != specularStrength) {
 		specularStrength = tmp;
 	}
 }
 void OpenGLWidget::setDiffuseStrength(int val)
 {
-	float tmp = ((float)val) / 100;
+	float tmp = static_cast<float>(val) / 100;
 	if (tmp != diffuseStrength) {
 		diffuseStrength = tmp;
 	}
 }
 void OpenGLWidget::setCAttenuation(int val)
 {
-	float tmp = ((float)val) / 100;
+	float tmp = static_cast<float>(val) / 100;
 	if (tmp != attenuationConstant) {
 		attenuationConstant = tmp;
 	}
 }
 void OpenGLWidget::setLAttenuation(int val)
 {
-	float tmp = ((float)val) / 100;
+	float tmp = static_cast<float>(val) / 100;
 	if (tmp != attenuationLinear) {
 		attenuationLinear = tmp;
 	}
 }
 void OpenGLWidget::setSAttenuation(int val)
 {
-	float tmp = ((float)val) / 100;
+	float tmp = static_cast<float>(val) / 100;
 	if (tmp != attenuationSquare) {
 		attenuationSquare = tmp;
 	}
@@ -92,79 +92,11 @@ void OpenGLWidget::setMaterial(int val)
 }
 void OpenGLWidget::setRS(int val)
 {
-	float tmp = ((float)val) / 10;
+	float tmp = static_cast<float>(val) / 10;
 	if (tmp != rotate_speed) {
 		rotate_speed = tmp;
 	}
 }
-
-
-void OpenGLWidget::initialize()
-{
-	//main object of scene
-	AssimpLoader load;
-	load.loadModel("materials\\MeshCube.obj");
-	cube = new Cube();
-	cube->initProg(this);
-	cube->initShaders("shaders\\ObjTexture.vs", "shaders\\ObjWithLightAndTexture.fs");
-	//light
-	light = new Cube();
-	light->initProg(this);
-	light->initShaders("shaders\\SimpleObj.vs", "shaders\\SimpleObj.fs");
-	second_light = new Cube();
-	second_light->initProg(this);
-	second_light->initShaders("shaders\\SimpleObj.vs", "shaders\\SimpleObj.fs");
-	//init keyboard control
-	keyboard = new KeyBoard();
-	// Use QBasicTimer because its faster than QTimer
-	timer.start(12, this);
-	//
-
-
-	cube->initObj(this);
-	cube->initNormal();
-	cube->enableAndSetAttribute();
-	light->initObj(this);
-	light->initNormal();
-	light->enableAndSetAttribute();
-	second_light->initObj(this);
-	second_light->initNormal();
-	second_light->enableAndSetAttribute();
-	//key control
-	keyboard->pressed_button.assign(60, false);
-	// light
-
-	begin = std::chrono::high_resolution_clock::now();
-
-	//texture
-	initTextures();
-}
-
-void OpenGLWidget::initializeGL()
-{
-	initializeOpenGLFunctions();
-	setFocusPolicy(Qt::StrongFocus);
-
-}
-void OpenGLWidget::initTextures()
-{
-	// Load cube.png image
-	texture = new QOpenGLTexture(QImage("container2.png").mirrored());
-	texture2 = new QOpenGLTexture(QImage("container2_specular.png").mirrored());
-	// Set nearest filtering mode for texture minification
-	texture->setMinificationFilter(QOpenGLTexture::Nearest);
-	texture2->setMinificationFilter(QOpenGLTexture::Nearest);
-
-	// Set bilinear filtering mode for texture magnification
-	texture->setMagnificationFilter(QOpenGLTexture::Linear);
-	texture2->setMagnificationFilter(QOpenGLTexture::Linear);
-
-	// Wrap texture coordinates by repeating
-	// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
-	texture->setWrapMode(QOpenGLTexture::Repeat);
-	texture2->setWrapMode(QOpenGLTexture::Repeat);
-}
-
 void OpenGLWidget::mousePressEvent(QMouseEvent* e)
 {
 	mousePressPosition = QVector2D(e->localPos());
@@ -241,6 +173,385 @@ void OpenGLWidget::timerEvent(QTimerEvent*)
 	// Request an update
 	update();
 }
+void OpenGLWidget::simple_init(SceneObject* obj, bool init_normals)
+{
+	obj->initProg(this);
+	obj->initShaders("shaders\\SimpleObj.vs", "shaders\\SimpleObj.fs");
+	obj->initObj(this);
+	if (init_normals)
+		obj->initNormal();
+	obj->enableAndSetAttribute();
+}
+
+void  OpenGLWidget::obj_init(SceneObject* obj, bool init_normals)
+{
+	obj->initProg(this);
+	obj->initShaders("shaders\\ObjTexture.vs", "shaders\\ObjWithLightAndTexture.fs");
+	obj->initObj(this);
+	obj->enableAndSetAttribute();
+}
+Cube* task5(OpenGLWidget* it_widget, int i)
+{
+	Cube* obj = new Cube();
+	obj->initProg(it_widget);
+	obj->initNormal();
+	obj->initShaders("shaders\\Task5.vs", "shaders\\Task5.fs");
+	obj->initObj(it_widget);
+	obj->enableAndSetAttribute();
+	int val = obj->getIndices().size() - 6;
+	for (int i = 0; i < val; ++i)
+		obj->getIndices().pop_back();
+	val = obj->getVertices().size() - 4 * obj->getDataLen();
+	for (int i = 0; i < val; ++i)
+		obj->getVertices().pop_back();
+	obj->getVertices()[0 + 1] = obj->getVertices()[0 + 1] * 100;
+	obj->getVertices()[3 * obj->getDataLen() + 1] = obj->getVertices()[3 * obj->getDataLen() + 1] * 100;
+	obj->getVertices()[1 * obj->getDataLen() + 1] = obj->getVertices()[1 * obj->getDataLen() + 1] * 100;
+	obj->getVertices()[2 * obj->getDataLen() + 1] = obj->getVertices()[2 * obj->getDataLen() + 1] * 100;
+	obj->getVertices()[0] += i;
+	obj->getVertices()[1 * obj->getDataLen()] += i;
+	obj->getVertices()[2 * obj->getDataLen()] += i;
+	obj->getVertices()[3 * obj->getDataLen()] += i;
+	obj->getVertices()[0 * obj->getDataLen() + 2] -= 5;
+	obj->getVertices()[1 * obj->getDataLen() + 2] -= 5;
+	obj->getVertices()[2 * obj->getDataLen() + 2] -= 5;
+	obj->getVertices()[3 * obj->getDataLen() + 2] -= 5;
+
+	return obj;
+}
+void OpenGLWidget::initialize()
+{
+	//main object of scene
+	AssimpLoader load;
+	//
+	load.loadModel("materials\\MeshSphere.obj");
+	SceneObject* obj = load.getObj();
+	obj->resize(6);
+	obj_init(obj, false);
+	obj->addTexture("materials\\Earth_Albedo.jpg");
+	obj->addTexture("materials\\Earth_Albedo.jpg");
+	obj->addTexture("materials\\Earth_NormalMap.jpg");
+	cube = static_cast<Cube*>(obj);
+	//0
+	load.loadModel("materials\\MeshCube.obj");
+	obj = load.getObj();
+	obj_init(obj, false);
+	obj->addTexture("container2.png");
+	obj->addTexture("container2_specular.png");
+	obj->addTexture("NormalMap.png");
+	obj_cont.push_back(obj);
+	//1
+	load.loadModel("materials\\MeshHouse.obj");
+	obj = load.getObj();
+	obj_init(obj, false);
+	obj->addTexture("container2.png");
+	obj->addTexture("container2_specular.png");
+	obj->addTexture("NormalMap.png");
+	obj_cont.push_back(obj);
+	//
+	/*load.loadModel("materials\\buggatti2.obj");
+	obj = load.getObj();
+	obj_init(obj, false);
+	obj->addTexture("container2.png");
+	obj->addTexture("container2_specular.png");
+	obj->addTexture("NormalMap.png");
+	obj_cont.push_back(obj);*/
+	//2
+	obj = task5(this, 0);
+	obj->addTexture("materials\\sand.jpg",
+		QOpenGLTexture::Nearest,
+		QOpenGLTexture::Nearest);
+	obj_cont.push_back(obj);
+	//3
+	obj = task5(this, 2);
+	obj->addTexture("materials\\sand.jpg",
+		QOpenGLTexture::LinearMipMapNearest,
+		QOpenGLTexture::LinearMipMapNearest);
+	obj_cont.push_back(obj);
+	//4
+	obj = task5(this, 4);
+	obj->addTexture("materials\\sand.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj_cont.push_back(obj);
+	//5
+	obj = task5(this, 6);
+	obj->addTexture("materials\\sand.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj_cont.push_back(obj);
+	//6
+	obj = task5(this, 8);
+	obj->addTexture("materials\\road_1.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj_cont.push_back(obj);
+	//7
+	obj = task5(this, 10);
+	obj->addTexture("materials\\road_1.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj->addTexture("materials\\road_2.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj_cont.push_back(obj);
+	//8
+	obj = task5(this, 12);
+	obj->addTexture("materials\\road_1.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj->addTexture("materials\\road_2.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj->addTexture("materials\\road_3.jpg",
+		QOpenGLTexture::LinearMipMapLinear,
+		QOpenGLTexture::Linear);
+	obj_cont.push_back(obj);
+	//light
+	light = new Cube();
+	simple_init(light, false);
+	second_light = new Cube();
+	simple_init(second_light, false);
+	//init keyboard control
+	keyboard = new KeyBoard();
+	// Use QBasicTimer because its faster than QTimer
+	timer.start(12, this);
+	//key control
+	keyboard->pressed_button.assign(60, false);
+	// light
+
+	begin = std::chrono::high_resolution_clock::now();
+
+	//texture
+	initTextures();
+}
+
+void OpenGLWidget::initializeGL()
+{
+	initializeOpenGLFunctions();
+	setFocusPolicy(Qt::StrongFocus);
+
+}
+void OpenGLWidget::initTextures()
+{
+	// Load cube.png image
+	texture = new QOpenGLTexture(QImage("materials\\Earth_Albedo.jpg").mirrored());
+	texture2 = new QOpenGLTexture(QImage("materials\\Earth_Albedo.jpg").mirrored());
+	texture3 = new QOpenGLTexture(QImage("materials\\Earth_NormalMap.jpg").mirrored());
+	// Set nearest filtering mode for texture minification
+	texture->setMinificationFilter(QOpenGLTexture::Nearest);
+	texture2->setMinificationFilter(QOpenGLTexture::Nearest);
+	texture3->setMinificationFilter(QOpenGLTexture::Nearest);
+
+	// Set bilinear filtering mode for texture magnification
+	texture->setMagnificationFilter(QOpenGLTexture::Linear);
+	texture2->setMagnificationFilter(QOpenGLTexture::Linear);
+	texture3->setMagnificationFilter(QOpenGLTexture::Linear);
+
+	// Wrap texture coordinates by repeating
+	// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
+	texture->setWrapMode(QOpenGLTexture::Repeat);
+	texture2->setWrapMode(QOpenGLTexture::Repeat);
+	texture3->setWrapMode(QOpenGLTexture::Repeat);
+}
+
+void OpenGLWidget::drawMainObj(SceneObject* obj_)
+{
+	obj_->getProgram()->bind();
+	std::vector<QMatrix4x4> trate_cont;//translate+rotate=trate
+	for (int i = 0; i < nox; ++i) {
+		for (int j = 0; j < noy; ++j) {
+			for (int k = 0; k < noz; ++k) {
+				QMatrix4x4 mat1;
+				mat1.translate(pow(-1, i) * 5 * ((i + 1) / 2), pow(-1, k) * 5 * ((k + 1) / 2), -j * 5);
+				mat1.rotate(rotation);
+				mat1.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+				mat1.rotate(m_yRot / 16.0f, 0, 1, 0);
+				mat1.rotate(m_zRot / 16.0f, 0, 0, 1);
+				trate_cont.push_back(mat1);
+			}
+		}
+	}
+	obj_->getProgram()->setUniformValue("viewPos", camera.cameraPos);
+	obj_->getProgram()->setUniformValue("lightPos", lightPos);
+	obj_->getProgram()->setUniformValue("lightColor", lightColor);
+	obj_->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	obj_->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	obj_->getProgram()->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
+	obj_->getProgram()->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
+	obj_->getProgram()->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
+	glActiveTexture(GL_TEXTURE0);
+	obj_->texture_cont[0].texture->bind();
+	cube->getProgram()->setUniformValue("material.diffuse", 0);
+	glActiveTexture(GL_TEXTURE1);
+	obj_->texture_cont[1].texture->bind();
+	cube->getProgram()->setUniformValue("material.specular", 1);
+	glActiveTexture(GL_TEXTURE2);
+	obj_->texture_cont[2].texture->bind();
+	obj_->getProgram()->setUniformValue("textureNormalMap", 2);
+	obj_->getProgram()->setUniformValue("material.shininess", material.shininess);
+	obj_->getProgram()->setUniformValue("slightPos", sl_lightPos);
+	obj_->getProgram()->setUniformValue("slightColor", sl_lightColor);
+	obj_->getProgram()->setUniformValue("dirLight.direction", camera.cameraPos);
+	obj_->getProgram()->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
+	obj_->getProgram()->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
+	obj_->getProgram()->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
+	obj_->getVao()->bind();
+	obj_->getVbo()->bind();
+
+	obj_->getVbo()->write(0, obj_->getVertices().data(), obj_->getVertices().size() * sizeof(float));
+	for (auto trate : trate_cont) {
+		obj_->getProgram()->setUniformValue("model", trate);
+		glDrawElements(GL_TRIANGLES, obj_->getIndices().size(), GL_UNSIGNED_INT, 0);
+	}
+	obj_->getVao()->release();
+	obj_->getProgram()->release();
+}
+void OpenGLWidget::drawotherObj(SceneObject* obj_, QVector3D trans)
+{
+	obj_->getProgram()->bind();
+
+	QMatrix4x4 mat1;
+	mat1.translate(trans);
+	mat1.rotate(rotation);
+	mat1.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+	mat1.rotate(m_yRot / 16.0f, 0, 1, 0);
+	mat1.rotate(m_zRot / 16.0f, 0, 0, 1);
+
+
+	obj_->getProgram()->setUniformValue("viewPos", camera.cameraPos);
+	obj_->getProgram()->setUniformValue("lightPos", lightPos);
+	obj_->getProgram()->setUniformValue("lightColor", lightColor);
+	obj_->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	obj_->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	obj_->getProgram()->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
+	obj_->getProgram()->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
+	obj_->getProgram()->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
+	glActiveTexture(GL_TEXTURE0);
+	obj_->texture_cont[0].texture->bind();
+	cube->getProgram()->setUniformValue("material.diffuse", 0);
+	glActiveTexture(GL_TEXTURE1);
+	obj_->texture_cont[1].texture->bind();
+	cube->getProgram()->setUniformValue("material.specular", 1);
+	glActiveTexture(GL_TEXTURE2);
+	obj_->texture_cont[2].texture->bind();
+	obj_->getProgram()->setUniformValue("textureNormalMap", 2);
+	obj_->getProgram()->setUniformValue("material.shininess", material.shininess);
+	obj_->getProgram()->setUniformValue("slightPos", sl_lightPos);
+	obj_->getProgram()->setUniformValue("slightColor", sl_lightColor);
+	obj_->getProgram()->setUniformValue("dirLight.direction", camera.cameraPos);
+	obj_->getProgram()->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
+	obj_->getProgram()->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
+	obj_->getProgram()->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
+	obj_->getVao()->bind();
+	obj_->getVbo()->bind();
+
+	obj_->getVbo()->write(0, obj_->getVertices().data(), obj_->getVertices().size() * sizeof(float));
+
+	obj_->getProgram()->setUniformValue("model", mat1);
+	glDrawElements(GL_TRIANGLES, obj_->getIndices().size(), GL_UNSIGNED_INT, 0);
+
+	obj_->getVao()->release();
+	obj_->getProgram()->release();
+}
+void OpenGLWidget::SimpledrawObj(SceneObject* obj_, QVector3D trans, QVector3D color)
+{
+	obj_->getProgram()->bind();
+	QMatrix4x4 mat1 = QMatrix4x4();
+	mat1.setToIdentity();
+	mat1.translate(trans);
+	obj_->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	obj_->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	obj_->getProgram()->setUniformValue("model", mat1);
+	obj_->getProgram()->setUniformValue("color", color);
+	obj_->getVao()->bind();
+	obj_->getVbo()->bind();
+	obj_->getVbo()->write(0, obj_->getVertices().data(), obj_->getVertices().size() * sizeof(float));
+	glDrawElements(GL_TRIANGLES, obj_->getIndices().size(), GL_UNSIGNED_INT, 0);
+	obj_->getVao()->release();
+}
+void OpenGLWidget::Task5Obj(SceneObject* obj_, bool anisotropy)
+{
+	obj_->getProgram()->bind();
+
+	QMatrix4x4 mat1;
+	mat1.rotate(rotation);
+	mat1.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+	mat1.rotate(m_yRot / 16.0f, 0, 1, 0);
+	mat1.rotate(m_zRot / 16.0f, 0, 0, 1);
+
+	QVector3D text_exist={0,0,0};
+	obj_->getProgram()->setUniformValue("viewPos", camera.cameraPos);
+	obj_->getProgram()->setUniformValue("lightPos", lightPos);
+	obj_->getProgram()->setUniformValue("lightColor", lightColor);
+	obj_->getProgram()->setUniformValue("view", camera.getViewMatrix());
+	obj_->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
+	obj_->getProgram()->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
+	obj_->getProgram()->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
+	obj_->getProgram()->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
+	glActiveTexture(GL_TEXTURE0);
+	obj_->texture_cont[0].texture->bind();
+	text_exist += {2, 0, 0};
+	if (anisotropy)
+	{
+		float ans = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ans);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ans);
+	}
+	else
+	{
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
+	}
+	cube->getProgram()->setUniformValue("textureroad1", 0);
+	cube->getProgram()->setUniformValue("material.diffuse", material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+	cube->getProgram()->setUniformValue("material.specular", material.specular[0], material.specular[1], material.specular[2]);
+	if (obj_->texture_cont.size() > 1) {
+		glActiveTexture(GL_TEXTURE1);
+		obj_->texture_cont[1].texture->bind();
+		text_exist += {0, 2, 0};
+		if (anisotropy)
+		{
+			float ans = 0.0f;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ans);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ans);
+		}
+		else
+		{
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
+		}
+		cube->getProgram()->setUniformValue("textureroad2", 1);
+	}
+	if (obj_->texture_cont.size() > 2) {
+		glActiveTexture(GL_TEXTURE2);
+		obj_->texture_cont[2].texture->bind();
+		text_exist += {0, 0, 2};
+		if (anisotropy)
+		{
+			float ans = 0.0f;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ans);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ans);
+		}
+		else
+		{
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
+		}
+		obj_->getProgram()->setUniformValue("textureroad3", 2);
+	}
+	obj_->getProgram()->setUniformValue("material.shininess", material.shininess);
+	obj_->getProgram()->setUniformValue("textureExist", text_exist);
+	obj_->getVao()->bind();
+	obj_->getVbo()->bind();
+
+	obj_->getVbo()->write(0, obj_->getVertices().data(), obj_->getVertices().size() * sizeof(float));
+
+	obj_->getProgram()->setUniformValue("model", mat1);
+	glDrawElements(GL_TRIANGLES, obj_->getIndices().size(), GL_UNSIGNED_INT, 0);
+
+	obj_->getVao()->release();
+	obj_->getProgram()->release();
+}
 double bft = 0;
 void OpenGLWidget::paintGL()
 {
@@ -280,95 +591,41 @@ void OpenGLWidget::paintGL()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 	glShadeModel(GL_SMOOTH);
-	//std::vector<GLfloat> ambient_matrial_red_plastic = { 0,0,0 };
-	//glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_matrial_red_plastic.data());
-	cube->getProgram()->bind();
 	QMatrix4x4 matrix;
-	std::vector<QMatrix4x4> trate_cont;//translate+rotate=trate
-	for (int i = 0; i < nox; ++i) {
-		for (int j = 0; j < noy; ++j) {
-			for (int k = 0; k < noz; ++k) {
-				QMatrix4x4 mat1;
-				mat1.translate(pow(-1, i) * 4 * ((i + 1) / 2), pow(-1, k) * 4 * ((k + 1) / 2), -j * 4);
-				mat1.rotate(rotation);
-				mat1.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
-				mat1.rotate(m_yRot / 16.0f, 0, 1, 0);
-				mat1.rotate(m_zRot / 16.0f, 0, 0, 1);
-				trate_cont.push_back(mat1);
-			}
-		}
-	}
+
 	matrix.translate(x_coord, y_coord, z_coord);
 	//keyEvent
 	keyevent();
-	cube->getProgram()->setUniformValue("viewPos", camera.cameraPos);
-	cube->getProgram()->setUniformValue("lightPos", lightPos);
-	cube->getProgram()->setUniformValue("lightColor", lightColor);
-	cube->getProgram()->setUniformValue("view", camera.getViewMatrix());
-	cube->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
-	cube->getProgram()->setUniformValue("strength", QVector3D(ambientStrength, specularStrength, diffuseStrength));
-	cube->getProgram()->setUniformValue("attenuationParam", QVector3D(attenuationConstant, attenuationLinear, attenuationSquare));
-	cube->getProgram()->setUniformValue("material.ambient", material.ambient[0], material.ambient[1], material.ambient[2]);
-	glActiveTexture(GL_TEXTURE0);
-	texture->bind();
-	cube->getProgram()->setUniformValue("material.diffuse", 0);
-	glActiveTexture(GL_TEXTURE1);
-	texture2->bind();
-	cube->getProgram()->setUniformValue("material.specular", 1);
-	cube->getProgram()->setUniformValue("material.shininess", material.shininess);
-	cube->getProgram()->setUniformValue("slightPos", sl_lightPos);
-	cube->getProgram()->setUniformValue("slightColor", sl_lightColor);
-	cube->getProgram()->setUniformValue("dirLight.direction", camera.cameraPos);
-	cube->getProgram()->setUniformValue("dirLight.ambient", 0.3f, 0.24f, 0.14f);
-	cube->getProgram()->setUniformValue("dirLight.diffuse", 0.7f, 0.42f, 0.26f);
-	cube->getProgram()->setUniformValue("dirLight.specular", 0.5f, 0.5f, 0.5f);
-
-	cube->getVao()->bind();
-	cube->getVbo()->bind();
-
-	cube->getVbo()->write(0, cube->getVertices().data(), cube->getVertices().size() * sizeof(float));
-	for (auto trate : trate_cont) {
-		cube->getProgram()->setUniformValue("model", trate);
-		glDrawElements(GL_TRIANGLES, cube->getIndices().size(), GL_UNSIGNED_SHORT, 0);
-	}
-	cube->getVao()->release();
-	cube->getProgram()->release();
-	light->getProgram()->bind();
-	QMatrix4x4 mat1 = QMatrix4x4();
-	mat1.setToIdentity();
-	mat1.translate(lightPos);
-	light->getProgram()->setUniformValue("view", camera.getViewMatrix());
-	light->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
-	light->getProgram()->setUniformValue("model", mat1);
-	light->getProgram()->setUniformValue("color", 1, 1, 1);
-	light->getVao()->bind();
-	light->getVbo()->bind();
-	light->getVbo()->write(0, light->getVertices().data(), light->getVertices().size() * sizeof(float));
-	glDrawElements(GL_TRIANGLES, light->getIndices().size(), GL_UNSIGNED_SHORT, 0);
-	light->getVao()->release();
-
-	second_light->getProgram()->bind();
-	mat1 = QMatrix4x4();
-	mat1.setToIdentity();
-	mat1.translate(sl_lightPos);
-	second_light->getProgram()->setUniformValue("view", camera.getViewMatrix());
-	second_light->getProgram()->setUniformValue("projection", camera.getProjectionMatrix());
-	second_light->getProgram()->setUniformValue("model", mat1);
-	second_light->getProgram()->setUniformValue("color", 1, 0, 0);
-	second_light->getVao()->bind();
-	second_light->getVbo()->bind();
-	second_light->getVbo()->write(0, second_light->getVertices().data(), second_light->getVertices().size() * sizeof(float));
-	glDrawElements(GL_TRIANGLES, second_light->getIndices().size(), GL_UNSIGNED_SHORT, 0);
-	second_light->getVao()->release();
+	//drawMainObj(cube);
+	drawotherObj(obj_cont[0], QVector3D(10, 10, 10));
+	drawotherObj(obj_cont[1], QVector3D(10, 10, -10));
+	//drawotherObj(obj_cont[2], QVector3D(10, -10, -10));
+	//3
+	Task5Obj(obj_cont[2], false);
+	//4
+	Task5Obj(obj_cont[3], false);
+	//5
+	Task5Obj(obj_cont[4], false);
+	//6
+	Task5Obj(obj_cont[5], true);
+	//7
+	Task5Obj(obj_cont[6], true);
+	//7
+	Task5Obj(obj_cont[7], true);
+	//7
+	Task5Obj(obj_cont[8], true);
+	//
+	SimpledrawObj(light, lightPos, lightColor);
+	SimpledrawObj(second_light, sl_lightPos, sl_lightColor);
 	++m_frame;
 	//fps
 	auto timet = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - begin);
-	lightPos = QVector3D(1.0f + sin(bft) * 2.0f + ligth_x_move, 10.0 + ligth_y_move, -40 + sin(bft / 2.0f) * 1.0f + ligth_z_move);
+	//lightPos = QQuaternion::fromAxisAndAngle({ 0,1,0 }, 0.8) * lightPos;
+	lightPos = QVector3D(1.0f + +ligth_x_move, 10.0 + ligth_y_move, 10 + ligth_z_move);
 	bft += 0.01;
 	if (timet.count() > 0.5) {
 		begin = std::chrono::high_resolution_clock::now();
 		fps = static_cast<float>(m_frame) / timet.count();
-
 		m_frame = 0;
 		updateFPS();
 	}

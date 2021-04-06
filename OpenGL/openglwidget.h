@@ -88,6 +88,13 @@ signals:
 	void showFPS();
 
 private:
+	void drawMainObj(SceneObject* obj_);
+	void drawotherObj(SceneObject* obj_, QVector3D trans);
+	void simple_init(SceneObject* obj, bool init_normals);
+	void  obj_init(SceneObject* obj, bool init_normals);
+	void SimpledrawObj(SceneObject* obj_, QVector3D trans, QVector3D color);
+	void Task5Obj(SceneObject* obj_, bool anisotropy);
+	std::vector<SceneObject*> obj_cont;
 	QBasicTimer timer;
 
 	GLfloat color_change = 0.0f;
@@ -133,20 +140,20 @@ private:
 	Camera camera;
 	//light
 	Cube* light;
-	QVector3D lightPos = QVector3D(0.0f, 10.0f, -40.0f);
+	QVector3D lightPos = QVector3D(0.0f, 0.0f, -15.0f);
 	QVector3D lightColor = QVector3D(1.0f, 1.0f, 1.0f);
 	float ambientStrength = 0.1f;
 	float specularStrength = 0.5f;
 	float diffuseStrength = 1;
-	float attenuationConstant= 1.0;
-	float attenuationLinear= 0.3;
-	float attenuationSquare= 0.1;
+	float attenuationConstant = 1.0;
+	float attenuationLinear = 0.3;
+	float attenuationSquare = 0.1;
 	float ligth_x_move = 0.0f;
 	float ligth_z_move = 0.0f;
 	float ligth_y_move = 0.0f;
 	//
 	MaterialCollection::MaterialCollection mC;
-	MaterialCollection::Material material= mC.material_collection[MaterialCollection::Pearl];
+	MaterialCollection::Material material = mC.material_collection[MaterialCollection::Pearl];
 	int numb_of_mat = MaterialCollection::Super_material;
 	//additional light
 	Cube* second_light;
@@ -162,10 +169,13 @@ private:
 	float sl_ligth_z_move = 0.0f;
 	float sl_ligth_y_move = 0.0f;
 	//rotate speed
-	float rotate_speed=1;
+	float rotate_speed = 1;
 	//texture
 	QOpenGLTexture* texture = nullptr;
 	QOpenGLTexture* texture2 = nullptr;
+	QOpenGLTexture* texture3 = nullptr;
+	//task5
+	std::vector< QOpenGLTexture*> task5_textures;
 };
 
 #endif // OPENGLWIDGET_H

@@ -170,7 +170,7 @@ public:
         diffuseSlider = new QSlider(centralwidget);
         diffuseSlider->setObjectName(QString::fromUtf8("diffuseSlider"));
         diffuseSlider->setGeometry(QRect(1520, 630, 321, 22));
-        diffuseSlider->setMaximum(5000);
+        diffuseSlider->setMaximum(10000);
         diffuseSlider->setValue(1000);
         diffuseSlider->setOrientation(Qt::Horizontal);
         label_8 = new QLabel(centralwidget);

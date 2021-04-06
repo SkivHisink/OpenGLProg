@@ -42,13 +42,13 @@ void SceneObject::initObj(QObject* f)
 	ibo->create();
 	ibo->setUsagePattern(QOpenGLBuffer::DynamicDraw);
 	ibo->bind();
-	ibo->allocate(indices.data(), indices.size() * sizeof(GLushort));
+	ibo->allocate(indices.data(), indices.size() * sizeof(GLuint));
 }
 
 void SceneObject::initProg(QObject* widget)
 {
 	m_program = new QOpenGLShaderProgram(widget);
-	
+
 }
 
 void SceneObject::initShaders(std::string vertexPath, std::string fragmentPath)
@@ -58,16 +58,27 @@ void SceneObject::initShaders(std::string vertexPath, std::string fragmentPath)
 	m_program->link();
 }
 
-void SceneObject::addTexture(std::string texturePath)
+void SceneObject::addTexture(std::string texturePath, QOpenGLTexture::Filter mini_filter , QOpenGLTexture::Filter magni_filter, QOpenGLTexture::WrapMode wrap_mode)
 {
+	QOpenGLTexture* texture = new QOpenGLTexture(QImage(texturePath.c_str()).mirrored());
+	// Set nearest filtering mode for texture minification
+	texture->setMinificationFilter(mini_filter);
+
+	// Set bilinear filtering mode for texture magnification
+	texture->setMagnificationFilter(magni_filter);
+	// Wrap texture coordinates by repeating
+	// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
+	texture->setWrapMode(wrap_mode);
+	texture_ temp = { texture, texturePath };
+	texture_cont.push_back(temp);
 }
 
-std::vector<float> SceneObject::getVertices()
+std::vector<float>& SceneObject::getVertices()
 {
 	return vertices;
 }
 
-std::vector<GLushort> SceneObject::getIndices()
+std::vector<GLuint>& SceneObject::getIndices()
 {
 	return indices;
 }
@@ -104,8 +115,16 @@ void SceneObject::enableAndSetAttribute()
 
 	m_program->enableAttributeArray("normal");
 	m_program->setAttributeBuffer("normal", GL_FLOAT, 3 * sizeof(float), 3, dataLen * sizeof(float));
+	if (dataLen >= 8) {
+		m_program->enableAttributeArray("aTexCoords");
+		m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 6 * sizeof(float), 2, dataLen * sizeof(float));
+	}
+	if(dataLen>=14)
+	{
+		m_program->enableAttributeArray("tangens");
+		m_program->setAttributeBuffer("tangens", GL_FLOAT, 8 * sizeof(float), 3, dataLen * sizeof(float));
+		m_program->enableAttributeArray("bitangens");
+		m_program->setAttributeBuffer("bitangens", GL_FLOAT, 11 * sizeof(float), 3, dataLen * sizeof(float));
 
-	m_program->enableAttributeArray("aTexCoords");
-	m_program->setAttributeBuffer("aTexCoords", GL_FLOAT, 6 * sizeof(float), 2, dataLen * sizeof(float));
-
+	}
 }
