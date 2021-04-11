@@ -204,10 +204,16 @@ Cube* task5(OpenGLWidget* it_widget, int i)
 	val = obj->getVertices().size() - 4 * obj->getDataLen();
 	for (int i = 0; i < val; ++i)
 		obj->getVertices().pop_back();
-	obj->getVertices()[0 + 1] = obj->getVertices()[0 + 1] * 100;
-	obj->getVertices()[3 * obj->getDataLen() + 1] = obj->getVertices()[3 * obj->getDataLen() + 1] * 100;
-	obj->getVertices()[1 * obj->getDataLen() + 1] = obj->getVertices()[1 * obj->getDataLen() + 1] * 100;
-	obj->getVertices()[2 * obj->getDataLen() + 1] = obj->getVertices()[2 * obj->getDataLen() + 1] * 100;
+	obj->getVertices()[0 + 1] *= 100;
+	obj->getVertices()[3 * obj->getDataLen() + 1] *= 100;
+	obj->getVertices()[1 * obj->getDataLen() + 1] *= 100;
+	obj->getVertices()[2 * obj->getDataLen() + 1] *= 100;
+	//texture
+	//obj->getVertices()[2 * obj->getDataLen() + 6] *= 100;
+	obj->getVertices()[2 * obj->getDataLen() + 7] *= 100;
+	obj->getVertices()[3 * obj->getDataLen() + 6] *= 100;
+	obj->getVertices()[3 * obj->getDataLen() + 7] *= 100;
+	//
 	obj->getVertices()[0] += i;
 	obj->getVertices()[1 * obj->getDataLen()] += i;
 	obj->getVertices()[2 * obj->getDataLen()] += i;
@@ -482,7 +488,7 @@ void OpenGLWidget::Task5Obj(SceneObject* obj_, bool anisotropy)
 	mat1.rotate(m_yRot / 16.0f, 0, 1, 0);
 	mat1.rotate(m_zRot / 16.0f, 0, 0, 1);
 
-	QVector3D text_exist={0,0,0};
+	QVector3D text_exist = { 0,0,0 };
 	obj_->getProgram()->setUniformValue("viewPos", camera.cameraPos);
 	obj_->getProgram()->setUniformValue("lightPos", lightPos);
 	obj_->getProgram()->setUniformValue("lightColor", lightColor);
